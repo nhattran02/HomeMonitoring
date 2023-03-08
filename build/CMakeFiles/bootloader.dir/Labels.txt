@@ -1,0 +1,13 @@
+# Target labels
+ bootloader
+# Source files and their labels
+/home/minhnhat/esp/workspace/esp32_cam/build/CMakeFiles/bootloader
+/home/minhnhat/esp/workspace/esp32_cam/build/CMakeFiles/bootloader.rule
+/home/minhnhat/esp/workspace/esp32_cam/build/CMakeFiles/bootloader-complete.rule
+/home/minhnhat/esp/workspace/esp32_cam/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+/home/minhnhat/esp/workspace/esp32_cam/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+/home/minhnhat/esp/workspace/esp32_cam/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+/home/minhnhat/esp/workspace/esp32_cam/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule
+/home/minhnhat/esp/workspace/esp32_cam/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+/home/minhnhat/esp/workspace/esp32_cam/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+/home/minhnhat/esp/workspace/esp32_cam/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule

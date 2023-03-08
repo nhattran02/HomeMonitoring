@@ -1,0 +1,29 @@
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/runpy.py", line 194, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.8/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/home/minhnhat/.espressif/python_env/idf5.1_py3.8_env/lib/python3.8/site-packages/esptool/__main__.py", line 11, in <module>
+    esptool._main()
+  File "/home/minhnhat/.espressif/python_env/idf5.1_py3.8_env/lib/python3.8/site-packages/esptool/__init__.py", line 1031, in _main
+    main()
+  File "/home/minhnhat/.espressif/python_env/idf5.1_py3.8_env/lib/python3.8/site-packages/esptool/__init__.py", line 671, in main
+    esp = esp or get_default_connected_device(
+  File "/home/minhnhat/.espressif/python_env/idf5.1_py3.8_env/lib/python3.8/site-packages/esptool/__init__.py", line 920, in get_default_connected_device
+    _esp.connect(before, connect_attempts)
+  File "/home/minhnhat/.espressif/python_env/idf5.1_py3.8_env/lib/python3.8/site-packages/esptool/loader.py", line 614, in connect
+    last_error = self._connect_attempt(reset_strategy, mode)
+  File "/home/minhnhat/.espressif/python_env/idf5.1_py3.8_env/lib/python3.8/site-packages/esptool/loader.py", line 504, in _connect_attempt
+    reset_strategy()  # Reset the chip to bootloader (download mode)
+  File "/home/minhnhat/.espressif/python_env/idf5.1_py3.8_env/lib/python3.8/site-packages/esptool/reset.py", line 85, in __call__
+    self._setDTRandRTS(True, False)  # IO0=LOW & EN=HIGH, chip out of reset
+  File "/home/minhnhat/.espressif/python_env/idf5.1_py3.8_env/lib/python3.8/site-packages/esptool/reset.py", line 56, in _setDTRandRTS
+    fcntl.ioctl(self.port.fileno(), TIOCMSET, struct.pack("I", status))
+OSError: [Errno 71] Protocol error
+CMake Error at run_serial_tool.cmake:63 (message):
+  
+  /home/minhnhat/.espressif/python_env/idf5.1_py3.8_env/bin/python;;/home/minhnhat/esp/esp-idf/components/esptool_py/esptool/esptool.py;--chip;esp32
+  failed.
+
+
+
