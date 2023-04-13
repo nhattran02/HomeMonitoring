@@ -1,0 +1,88 @@
+[1/10] Performing build step for 'bootloader'
+[1/1] cd /home/minhnhat/esp/workspace/ESP32-Cam-IDF-Driver-/build/bootloader/esp-idf/esptool_py && /home/minhnhat/.espressif/python_env/idf5.1_py3.8_env/bin/python /home/minhnhat/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 /home/minhnhat/esp/workspace/ESP32-Cam-IDF-Driver-/build/bootloader/bootloader.bin
+Bootloader binary size 0x6730 bytes. 0x8d0 bytes (8%) free.
+[2/8] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/main.c.obj
+../main/main.c:32:13: warning: 'uart_event_task' declared 'static' but never defined [-Wunused-function]
+   32 | static void uart_event_task(void *pvParameters);
+      |             ^~~~~~~~~~~~~~~
+[3/8] Linking C static library esp-idf/main/libmain.a
+[4/8] Generating ld/sections.ld
+[5/8] Linking CXX executable esp32_cam_http_stream.elf
+[6/8] Generating binary image from built executable
+esptool.py v4.5.dev2
+Creating esp32 image...
+Merged 25 ELF sections
+Successfully created esp32 image.
+Generated /home/minhnhat/esp/workspace/ESP32-Cam-IDF-Driver-/build/esp32_cam_http_stream.bin
+[7/8] cd /home/minhnhat/esp/workspace/ESP32-Cam-IDF-Driver-/build/esp-idf/esptool_py && /home/minhnhat/.espressif/python_env/idf5.1_py3.8_env/bin/python /home/minhnhat/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /home/minhnhat/esp/workspace/ESP32-Cam-IDF-Driver-/build/partition_table/partition-table.bin /home/minhnhat/esp/workspace/ESP32-Cam-IDF-Driver-/build/esp32_cam_http_stream.bin
+esp32_cam_http_stream.bin binary size 0xee980 bytes. Smallest app partition is 0x100000 bytes. 0x11680 bytes (7%) free.
+[7/8] cd /home/minhnhat/esp/esp-idf/components/esptool_py && /usr/bin/cmake -D IDF_PATH=/home/minhnhat/esp/esp-idf -D "SERIAL_TOOL=/home/minhnhat/.espressif/python_env/idf5.1_py3.8_env/bin/python;;/home/minhnhat/esp/esp-idf/components/esptool_py/esptool/esptool.py;--chip;esp32" -D "SERIAL_TOOL_ARGS=--before=default_reset;--after=hard_reset;write_flash;@flash_args" -D WORKING_DIRECTORY=/home/minhnhat/esp/workspace/ESP32-Cam-IDF-Driver-/build -P /home/minhnhat/esp/esp-idf/components/esptool_py/run_serial_tool.cmake
+esptool esp32 -p /dev/ttyUSB0 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 40m --flash_size 2MB 0x1000 bootloader/bootloader.bin 0x10000 esp32_cam_http_stream.bin 0x8000 partition_table/partition-table.bin
+esptool.py v4.5.dev2
+Serial port /dev/ttyUSB0
+Connecting....
+Chip is ESP32-D0WDQ6 (revision v1.0)
+Features: WiFi, BT, Dual Core, 240MHz, VRef calibration in efuse, Coding Scheme None
+Crystal is 40MHz
+MAC: ec:62:60:9c:ed:94
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00001000 to 0x00007fff...
+Flash will be erased from 0x00010000 to 0x000fefff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+Compressed 26416 bytes to 16500...
+Writing at 0x00001000... (50 %)
+Writing at 0x00007696... (100 %)
+Wrote 26416 bytes (16500 compressed) at 0x00001000 in 0.9 seconds (effective 247.8 kbit/s)...
+Hash of data verified.
+Compressed 977280 bytes to 592374...
+Writing at 0x00010000... (2 %)
+Writing at 0x0001ca16... (5 %)
+Writing at 0x0002803e... (8 %)
+Writing at 0x000336c1... (10 %)
+Writing at 0x00038d2f... (13 %)
+Writing at 0x00041502... (16 %)
+Writing at 0x00046f6a... (18 %)
+Writing at 0x0004de3e... (21 %)
+Writing at 0x00055908... (24 %)
+Writing at 0x0005bc6f... (27 %)
+Writing at 0x000619ec... (29 %)
+Writing at 0x00067830... (32 %)
+Writing at 0x0006d954... (35 %)
+Writing at 0x00073228... (37 %)
+Writing at 0x000784cb... (40 %)
+Writing at 0x0007d9e9... (43 %)
+Writing at 0x00082e24... (45 %)
+Writing at 0x00088610... (48 %)
+Writing at 0x0008de54... (51 %)
+Writing at 0x00093a12... (54 %)
+Writing at 0x0009969d... (56 %)
+Writing at 0x0009efd7... (59 %)
+Writing at 0x000a4d71... (62 %)
+Writing at 0x000aaa29... (64 %)
+Writing at 0x000b04a0... (67 %)
+Writing at 0x000b615c... (70 %)
+Writing at 0x000bc8fa... (72 %)
+Writing at 0x000c2e08... (75 %)
+Writing at 0x000c89fb... (78 %)
+Writing at 0x000d0ab6... (81 %)
+Writing at 0x000da2ca... (83 %)
+Writing at 0x000e03f1... (86 %)
+Writing at 0x000e6ee4... (89 %)
+Writing at 0x000ecdc8... (91 %)
+Writing at 0x000f2944... (94 %)
+Writing at 0x000f8543... (97 %)
+Writing at 0x000fd8e8... (100 %)
+Wrote 977280 bytes (592374 compressed) at 0x00010000 in 14.8 seconds (effective 528.6 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 103...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (103 compressed) at 0x00008000 in 0.1 seconds (effective 403.4 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...

@@ -8,15 +8,93 @@
 #include "esp_timer.h"
 #include "camera_pins.h"
 #include "connect_wifi.h"
+#include "driver/uart.h"
 
+#define LED                     4
+#define EX_UART_NUM             UART_NUM_0
+#define BUF_SIZE                (1024)
+#define RD_BUF_SIZE             (BUF_SIZE)
+#define PART_BOUNDARY           "123456789000000000000987654321"
+#define CONFIG_XCLK_FREQ        20000000 
+#define TXD_PIN                 1
+#define RXD_PIN                 3
 static const char *TAG = "ESP32-CAM";
-
-#define PART_BOUNDARY "123456789000000000000987654321"
+// static QueueHandle_t uart0_queue;
 static const char* _STREAM_CONTENT_TYPE = "multipart/x-mixed-replace;boundary=" PART_BOUNDARY;
 static const char* _STREAM_BOUNDARY = "\r\n--" PART_BOUNDARY "\r\n";
 static const char* _STREAM_PART = "Content-Type: image/jpeg\r\nContent-Length: %u\r\n\r\n";
 
-#define CONFIG_XCLK_FREQ 20000000 
+
+
+
+httpd_handle_t setup_server(void);
+esp_err_t jpg_stream_httpd_handler(httpd_req_t *req);
+static void uart_event_task(void *pvParameters);
+static void Init_Hardware(void);
+static esp_err_t init_camera(void);
+static void read_uart(void *arg);
+
+httpd_uri_t uri_get = {
+    .uri = "/",
+    .method = HTTP_GET,
+    .handler = jpg_stream_httpd_handler,
+    .user_ctx = NULL
+};
+
+void app_main()
+{
+    Init_Hardware();
+    connect_wifi();
+    if (wifi_connect_status){
+        init_camera();
+        setup_server();
+        ESP_LOGI(TAG, "Web Server is up and running\n");
+    }else{
+        ESP_LOGI(TAG, "Failed to connected with Wi-Fi, check your network Credentials\n");
+    }   
+	xTaskCreate(&read_uart, "UART task", 1024*4, NULL, 3, NULL);            
+}
+
+static void read_uart(void *arg)
+{
+    uint8_t buff[RD_BUF_SIZE];
+    while(1){
+        if(uart_read_bytes(EX_UART_NUM, buff, RD_BUF_SIZE, 2000 / portTICK_PERIOD_MS) > 0){
+            printf("temp: %d\n", (int)buff[0]);
+        }
+    }
+}
+
+static void Init_Hardware(void){
+    gpio_set_direction(LED, GPIO_MODE_OUTPUT);
+    // Initialize NVS
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND){
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        nvs_flash_init();
+    }
+    //Install UART driver, and get the queue.
+    uart_driver_install(EX_UART_NUM, BUF_SIZE * 2, BUF_SIZE * 2, 20, NULL, 0);
+    uart_param_config(EX_UART_NUM, &(uart_config_t) {
+        .baud_rate = 115200,
+        .data_bits = UART_DATA_8_BITS,
+        .parity = UART_PARITY_DISABLE,
+        .stop_bits = UART_STOP_BITS_1,
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+        .source_clk = UART_SCLK_DEFAULT,
+    });
+    uart_set_pin(EX_UART_NUM, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+}
+
+httpd_handle_t setup_server(void)
+{
+    httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+    httpd_handle_t stream_httpd  = NULL;
+    if (httpd_start(&stream_httpd , &config) == ESP_OK){
+        httpd_register_uri_handler(stream_httpd , &uri_get);
+    }
+    return stream_httpd;
+}
 
 static esp_err_t init_camera(void)
 {
@@ -116,46 +194,4 @@ esp_err_t jpg_stream_httpd_handler(httpd_req_t *req){
     }
     last_frame = 0;
     return res;
-}
-
-httpd_uri_t uri_get = {
-    .uri = "/",
-    .method = HTTP_GET,
-    .handler = jpg_stream_httpd_handler,
-    .user_ctx = NULL};
-
-httpd_handle_t setup_server(void)
-{
-    httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-    httpd_handle_t stream_httpd  = NULL;
-    if (httpd_start(&stream_httpd , &config) == ESP_OK)
-    {
-        httpd_register_uri_handler(stream_httpd , &uri_get);
-    }
-    return stream_httpd;
-}
-
-void app_main()
-{
-    esp_err_t err;
-    // Initialize NVS
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
-    {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        ret = nvs_flash_init();
-    }
-    connect_wifi();
-    if (wifi_connect_status)
-    {
-        err = init_camera();
-        if (err != ESP_OK)
-        {
-            printf("err: %s\n", esp_err_to_name(err));
-            return;
-        }
-        setup_server();
-        ESP_LOGI(TAG, "ESP32 CAM Web Server is up and running\n");
-    }else
-        ESP_LOGI(TAG, "Failed to connected with Wi-Fi, check your network Credentials\n");
 }
