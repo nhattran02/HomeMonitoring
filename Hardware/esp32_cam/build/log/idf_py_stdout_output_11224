@@ -1,0 +1,107 @@
+[1/10] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/main.c.obj
+C:/esp/Espressif/frameworks/ESP32-Cam-IDF-Driver-/main/main.c: In function 'http_get_task':
+C:/esp/Espressif/frameworks/ESP32-Cam-IDF-Driver-/main/main.c:276:22: warning: unused variable 'MQ4_' [-Wunused-variable]
+  276 |             uint32_t MQ4_  = data[2];
+      |                      ^~~~
+C:/esp/Espressif/frameworks/ESP32-Cam-IDF-Driver-/main/main.c:275:22: warning: unused variable 'hum_' [-Wunused-variable]
+  275 |             uint32_t hum_  = data[1];
+      |                      ^~~~
+C:/esp/Espressif/frameworks/ESP32-Cam-IDF-Driver-/main/main.c:274:22: warning: unused variable 'temp_' [-Wunused-variable]
+  274 |             uint32_t temp_ = data[0];
+      |                      ^~~~~
+C:/esp/Espressif/frameworks/ESP32-Cam-IDF-Driver-/main/main.c:240:14: warning: unused variable 'MQ4_' [-Wunused-variable]
+  240 |     uint32_t MQ4_  = 0;
+      |              ^~~~
+C:/esp/Espressif/frameworks/ESP32-Cam-IDF-Driver-/main/main.c:239:14: warning: unused variable 'hum_' [-Wunused-variable]
+  239 |     uint32_t hum_  = 0;
+      |              ^~~~
+C:/esp/Espressif/frameworks/ESP32-Cam-IDF-Driver-/main/main.c:238:14: warning: unused variable 'temp_' [-Wunused-variable]
+  238 |     uint32_t temp_ = 0;
+      |              ^~~~~
+C:/esp/Espressif/frameworks/ESP32-Cam-IDF-Driver-/main/main.c: At top level:
+C:/esp/Espressif/frameworks/ESP32-Cam-IDF-Driver-/main/main.c:38:13: warning: 'uart_event_task' declared 'static' but never defined [-Wunused-function]
+   38 | static void uart_event_task(void *pvParameters);
+      |             ^~~~~~~~~~~~~~~
+[2/10] Linking C static library esp-idf\main\libmain.a
+[3/10] Performing build step for 'bootloader'
+[1/1] cmd.exe /C "cd /D C:\esp\Espressif\frameworks\ESP32-Cam-IDF-Driver-\build\bootloader\esp-idf\esptool_py && C:\esp\Espressif\python_env\idf5.0_py3.8_env\Scripts\python.exe C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 C:/esp/Espressif/frameworks/ESP32-Cam-IDF-Driver-/build/bootloader/bootloader.bin"
+Bootloader binary size 0x6710 bytes. 0x8f0 bytes (8%) free.
+[4/8] Generating ld/sections.ld
+[5/8] Linking CXX executable esp32_cam_http_stream.elf
+[6/8] Generating binary image from built executable
+esptool.py v4.5
+Creating esp32 image...
+Merged 25 ELF sections
+Successfully created esp32 image.
+Generated C:/esp/Espressif/frameworks/ESP32-Cam-IDF-Driver-/build/esp32_cam_http_stream.bin
+[7/8] cmd.exe /C "cd /D C:\esp\Espressif\frameworks\ESP32-Cam-IDF-Driver-\build\esp-idf\esptool_py && C:\esp\Espressif\python_env\idf5.0_py3.8_env\Scripts\python.exe C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/partition_table/check_sizes.py --offset 0x8000 partition --type app C:/esp/Espressif/frameworks/ESP32-Cam-IDF-Driver-/build/partition_table/partition-table.bin C:/esp/Espressif/frameworks/ESP32-Cam-IDF-Driver-/build/esp32_cam_http_stream.bin"
+esp32_cam_http_stream.bin binary size 0xeba70 bytes. Smallest app partition is 0x100000 bytes. 0x14590 bytes (8%) free.
+[7/8] cmd.exe /C "cd /D C:\esp\Espressif\frameworks\esp-idf-v5.0.1\components\esptool_py && C:\esp\Espressif\tools\cmake\3.24.0\bin\cmake.exe -D IDF_PATH=C:/esp/Espressif/frameworks/esp-idf-v5.0.1 -D SERIAL_TOOL=C:/esp/Espressif/python_env/idf5.0_py3.8_env/Scripts/python.exe;;C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/esptool_py/esptool/esptool.py;--chip;esp32 -D SERIAL_TOOL_ARGS=--before=default_reset;--after=hard_reset;write_flash;@flash_args -D WORKING_DIRECTORY=C:/esp/Espressif/frameworks/ESP32-Cam-IDF-Driver-/build -P C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/esptool_py/run_serial_tool.cmake"
+esptool esp32 -p COM6 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 40m --flash_size 2MB 0x1000 bootloader/bootloader.bin 0x10000 esp32_cam_http_stream.bin 0x8000 partition_table/partition-table.bin
+esptool.py v4.5
+Serial port COM6
+Connecting.....
+Chip is ESP32-D0WDQ6 (revision v1.0)
+Features: WiFi, BT, Dual Core, 240MHz, VRef calibration in efuse, Coding Scheme None
+Crystal is 40MHz
+MAC: ec:62:60:9c:ed:94
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00001000 to 0x00007fff...
+Flash will be erased from 0x00010000 to 0x000fbfff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+Compressed 26384 bytes to 16453...
+Writing at 0x00001000... (50 %)
+Writing at 0x000076ac... (100 %)
+Wrote 26384 bytes (16453 compressed) at 0x00001000 in 0.9 seconds (effective 236.0 kbit/s)...
+Hash of data verified.
+Compressed 965232 bytes to 587551...
+Writing at 0x00010000... (2 %)
+Writing at 0x0001caf3... (5 %)
+Writing at 0x000291c9... (8 %)
+Writing at 0x00030e81... (11 %)
+Writing at 0x000364b8... (13 %)
+Writing at 0x000409ac... (16 %)
+Writing at 0x000464a7... (19 %)
+Writing at 0x0004d848... (22 %)
+Writing at 0x00054724... (25 %)
+Writing at 0x0005b20c... (27 %)
+Writing at 0x0006123a... (30 %)
+Writing at 0x00066cdf... (33 %)
+Writing at 0x0006c842... (36 %)
+Writing at 0x00072440... (38 %)
+Writing at 0x000781c2... (41 %)
+Writing at 0x0007e2c2... (44 %)
+Writing at 0x0008407b... (47 %)
+Writing at 0x00089d40... (50 %)
+Writing at 0x0008eee5... (52 %)
+Writing at 0x00094339... (55 %)
+Writing at 0x00099531... (58 %)
+Writing at 0x0009ece6... (61 %)
+Writing at 0x000a43ec... (63 %)
+Writing at 0x000aa01f... (66 %)
+Writing at 0x000afa0f... (69 %)
+Writing at 0x000b567d... (72 %)
+Writing at 0x000bbe50... (75 %)
+Writing at 0x000c2430... (77 %)
+Writing at 0x000c7fa4... (80 %)
+Writing at 0x000d1268... (83 %)
+Writing at 0x000d9b70... (86 %)
+Writing at 0x000dfddd... (88 %)
+Writing at 0x000e608b... (91 %)
+Writing at 0x000eb946... (94 %)
+Writing at 0x000f15c9... (97 %)
+Writing at 0x000f6e8d... (100 %)
+Wrote 965232 bytes (587551 compressed) at 0x00010000 in 15.0 seconds (effective 514.8 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 103...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (103 compressed) at 0x00008000 in 0.1 seconds (effective 393.1 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...

@@ -1,0 +1,6 @@
+DHT11.c:11:6:set_pin_output	48	static
+DHT11.c:29:6:set_pin_input	48	static
+DHT11.c:44:6:DHT11_Start	8	static
+DHT11.c:53:9:DHT11_Check_Response	16	static
+DHT11.c:67:9:DHT11_Read	16	static
+DHT11.c:83:6:DHT11_GetData	24	static
