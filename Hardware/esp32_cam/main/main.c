@@ -31,7 +31,6 @@
 char url_string[512] = "https://api.telegram.org/bot";
 char REQUEST[512];
 char recv_buf[512];
-
 static const char *TAG = "ESP32-CAM";
 static QueueHandle_t queue_data;
 static const char* _STREAM_CONTENT_TYPE = "multipart/x-mixed-replace;boundary=" PART_BOUNDARY;
@@ -40,7 +39,7 @@ static const char* _STREAM_PART = "Content-Type: image/jpeg\r\nContent-Length: %
 extern const char telegram_certificate_pem_start[] asm("_binary_telegram_certificate_pem_start");
 extern const char telegram_certificate_pem_end[]   asm("_binary_telegram_certificate_pem_end");
 
-
+/* Prototype */
 httpd_handle_t setup_server(void);
 esp_err_t jpg_stream_httpd_handler(httpd_req_t *req);
 static void uart_event_task(void *pvParameters);
@@ -48,11 +47,13 @@ static void Init_Hardware(void);
 static esp_err_t init_camera(void);
 static void read_uart(void *pvParameters);
 static uint32_t GetMQ4Value(uint8_t *buf);
-static void http_get_task(void *pvParameters);
+static void http_get_thingspeak_task(void *pvParameters);
 static void camera_task(void *pvParameters);
-static void https_telegram_getMe_perform(void);
-static void https_telegram_sendMessage_perform_post(char *message);
-static void http_telegram_task(void *pvParameters);
+// static void https_telegram_getMe_perform(void);
+esp_http_client_handle_t telegram_start(void) ;
+static void telegram_task(void *pvParameters);
+static void telegram_stop(esp_http_client_handle_t client);
+static void telegram_send_message(esp_http_client_handle_t client, char *message);
 esp_err_t _http_event_handler(esp_http_client_event_t *evt);
 
 httpd_uri_t uri_get = {
@@ -68,17 +69,22 @@ void app_main()
     connect_wifi(); 
 	xTaskCreate(&camera_task, "camera task", 1024*4, NULL, 3, NULL);
 	xTaskCreate(&read_uart, "UART task", 1024*3, NULL, 3, NULL);        
-    xTaskCreate(&http_get_task, "http_get_task", 1024*4, NULL, 3, NULL);
-    xTaskCreate(&http_telegram_task, "http_telegram_task", 8192*4, NULL, 3, NULL);
+    xTaskCreate(&http_get_thingspeak_task, "http_get_task", 1024*4, NULL, 3, NULL);
+    xTaskCreate(&telegram_task, "http_telegram_task", 8192*4, NULL, 3, NULL);
 
 }
 
-static void http_telegram_task(void *pvParameters)
+static void telegram_task(void *pvParameters)
 {   
     strcat(url_string, TOKEN);
-    https_telegram_sendMessage_perform_post("-r TEST from \n-u ESPCAM!! ");
-    // https_telegram_getMe_perform();
-    https_telegram_sendMessage_perform_post("-n TEST from \n-a STM32!!");
+    esp_http_client_handle_t client = telegram_start();
+
+    telegram_send_message(client, "Tran ");
+    telegram_send_message(client, "Minh ");
+    telegram_send_message(client, "Nhat ");
+    telegram_send_message(client, " ");
+
+    telegram_stop(client);
     vTaskDelete(NULL);
 }
 
@@ -254,7 +260,8 @@ static uint32_t GetMQ4Value(uint8_t *buf)
     return ((uint32_t)buf[2] << 24) | ((uint32_t)buf[3] << 16) | ((uint32_t)buf[4] << 8) | ((uint32_t)buf[5] << 0);
 }
 
-static void http_get_task(void *pvParameters)
+
+static void http_get_thingspeak_task(void *pvParameters)
 {
     const struct addrinfo hints = {
         .ai_family = AF_INET,
@@ -351,40 +358,8 @@ static void http_get_task(void *pvParameters)
 }
 
 
-static void https_telegram_getMe_perform(void) {
-	char buffer[HTTP_MAX_BUf] = {0};   // Buffer to store response of http request
-	char url[512] = "";
-    esp_http_client_config_t config = {
-        .url = "https://api.telegram.org",
-        .transport_type = HTTP_TRANSPORT_OVER_SSL,
-        .event_handler = _http_event_handler,
-        .cert_pem = telegram_certificate_pem_start,
-        .user_data = buffer,        // Pass address of local buffer to get response
-    };
-    /* Creating the string of the url*/
-    //Copy the URL + TOKEN
-    strcat(url, url_string);
-    //Adding the method
-    strcat(url,"/getMe");
-
-    esp_http_client_handle_t client = esp_http_client_init(&config);
-    esp_http_client_set_url(client, url);
-    esp_http_client_set_method(client, HTTP_METHOD_GET);
-    esp_err_t err = esp_http_client_perform(client);
-
-    if (err == ESP_OK) {
-        printf("HTTPS Status = %d, content_length = %lld",
-                esp_http_client_get_status_code(client),
-                esp_http_client_get_content_length(client));
-        printf("Output: %s",buffer);
-    } else {
-        printf("Error perform http request %s", esp_err_to_name(err));
-    }
-    esp_http_client_close(client);
-    esp_http_client_cleanup(client);
-}
-
-static void https_telegram_sendMessage_perform_post(char *message) {
+esp_http_client_handle_t telegram_start(void) 
+{
 	char url[512] = "";
     char output_buffer[HTTP_MAX_BUf] = {0};   // Buffer to store response of http request
     esp_http_client_config_t config = {
@@ -398,17 +373,11 @@ static void https_telegram_sendMessage_perform_post(char *message) {
     strcat(url,url_string);
     strcat(url,"/sendMessage");
     esp_http_client_set_url(client, url);
-	char post_data[512] = "";
-	sprintf(post_data,"{\"chat_id\":%s,\"text\":\"%s\"}",CHAT_ID, message);
-    esp_http_client_set_method(client, HTTP_METHOD_POST);
-    esp_http_client_set_header(client, "Content-Type", "application/json");
-    esp_http_client_set_post_field(client, post_data, strlen(post_data));
-    esp_err_t err = esp_http_client_perform(client);
-    esp_http_client_close(client);
-    esp_http_client_cleanup(client);
+    return client;
 }
 
-esp_err_t _http_event_handler(esp_http_client_event_t *evt) {
+esp_err_t _http_event_handler(esp_http_client_event_t *evt) 
+{
     static char *output_buffer;  // Buffer to store response of http request from event handler
     static int output_len;       // Stores number of bytes read
     switch(evt->event_id) {
@@ -479,3 +448,19 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt) {
     }
     return ESP_OK;
 }
+
+static void telegram_send_message(esp_http_client_handle_t client, char *message)
+{
+    char post_data[512] = "";
+	sprintf(post_data,"{\"chat_id\":%s,\"text\":\"%s\"}",CHAT_ID, message);
+    esp_http_client_set_method(client, HTTP_METHOD_POST);
+    esp_http_client_set_header(client, "Content-Type", "application/json");
+    esp_http_client_set_post_field(client, post_data, strlen(post_data));
+    esp_err_t err = esp_http_client_perform(client);
+}
+
+static void telegram_stop(esp_http_client_handle_t client)
+{
+    esp_http_client_close(client);
+    esp_http_client_cleanup(client);
+} 
