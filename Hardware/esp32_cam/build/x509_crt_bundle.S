@@ -1,4 +1,4 @@
-/* * Data converted from C:/esp/Espressif/frameworks/ESP32-Cam-IDF-Driver-/build/esp-idf/mbedtls/x509_crt_bundle
+/* * Data converted from C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/build/esp-idf/mbedtls/x509_crt_bundle
  */
 .data
 .section .rodata.embedded

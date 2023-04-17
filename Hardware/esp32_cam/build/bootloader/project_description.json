@@ -1,8 +1,8 @@
 {
     "project_name":       "bootloader",
     "project_path":       "C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/bootloader/subproject",
-    "build_dir":          "C:/esp/Espressif/frameworks/ESP32-Cam-IDF-Driver-/build/bootloader",
-    "config_file":        "C:/esp/Espressif/frameworks/ESP32-Cam-IDF-Driver-/sdkconfig",
+    "build_dir":          "C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/build/bootloader",
+    "config_file":        "C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/sdkconfig",
     "config_defaults":    "",
     "bootloader_elf":     "",
     "app_elf":            "bootloader.elf",

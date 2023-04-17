@@ -39,6 +39,6 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/esp/Espressif/frameworks/ESP32-Cam-IDF-Driver-/build/bootloader/esp-idf/soc/esp32/cmake_install.cmake")
+  include("C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/build/bootloader/esp-idf/soc/esp32/cmake_install.cmake")
 endif()
 

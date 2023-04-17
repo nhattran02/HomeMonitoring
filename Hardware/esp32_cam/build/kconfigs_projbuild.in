@@ -3,4 +3,4 @@ source "C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/esp_app_format/Kco
 source "C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/esp_rom/Kconfig.projbuild"
 source "C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/esptool_py/Kconfig.projbuild"
 source "C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/partition_table/Kconfig.projbuild"
-source "C:/esp/Espressif/frameworks/ESP32-Cam-IDF-Driver-/main/Kconfig.projbuild"
+source "C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/Kconfig.projbuild"

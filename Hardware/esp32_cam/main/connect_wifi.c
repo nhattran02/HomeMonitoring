@@ -5,8 +5,8 @@ static const char *TAG = "Connect_WiFi";
 int s_retry_num = 0;
 
 
-#define WIFI_SSID "aaa" //your name wifi
-#define WIFI_PASSWORD "00000000"  //your wifi password
+#define WIFI_SSID "MANGDAYKTX H2-808" //your name wifi
+#define WIFI_PASSWORD "44448888a"  //your wifi password
 #define MAXIMUM_RETRY 5
 /* FreeRTOS event group to signal when we are connected*/
 EventGroupHandle_t s_wifi_event_group;
@@ -82,6 +82,10 @@ void connect_wifi(void)
              * However these modes are deprecated and not advisable to be used. Incase your Access point
              * doesn't support WPA2, these mode can be enabled by commenting below line */
             .threshold.authmode = WIFI_AUTH_WPA2_PSK,
+            .pmf_cfg = {
+                .capable = true,
+                .required = false
+            },
         },
     };
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));

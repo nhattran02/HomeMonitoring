@@ -9,10 +9,14 @@
 #include "camera_pins.h"
 #include "connect_wifi.h"
 #include "driver/uart.h"
+#include "esp_http_client.h"
+#include "esp_tls.h"
+
 
 #define LED                     4
 #define EX_UART_NUM             UART_NUM_0
 #define BUF_SIZE                (1024)
+#define HTTP_MAX_BUf            2048
 #define RD_BUF_SIZE             (BUF_SIZE)
 #define PART_BOUNDARY           "123456789000000000000987654321"
 #define CONFIG_XCLK_FREQ        20000000 
@@ -20,14 +24,21 @@
 #define RXD_PIN                 3
 #define WEB_SERVER              "api.thingspeak.com"
 #define WEB_PORT                "80"
+#define TELEGRAM_ENABLE         1
+#define TOKEN                   "5874407007:AAGksmiPfSyaePhCJC_ohMl1EL05_bfP9Pw"
+#define CHAT_ID                 "1928092894"
 
+char url_string[512] = "https://api.telegram.org/bot";
 char REQUEST[512];
 char recv_buf[512];
+
 static const char *TAG = "ESP32-CAM";
 static QueueHandle_t queue_data;
 static const char* _STREAM_CONTENT_TYPE = "multipart/x-mixed-replace;boundary=" PART_BOUNDARY;
 static const char* _STREAM_BOUNDARY = "\r\n--" PART_BOUNDARY "\r\n";
 static const char* _STREAM_PART = "Content-Type: image/jpeg\r\nContent-Length: %u\r\n\r\n";
+extern const char telegram_certificate_pem_start[] asm("_binary_telegram_certificate_pem_start");
+extern const char telegram_certificate_pem_end[]   asm("_binary_telegram_certificate_pem_end");
 
 
 httpd_handle_t setup_server(void);
@@ -35,10 +46,14 @@ esp_err_t jpg_stream_httpd_handler(httpd_req_t *req);
 static void uart_event_task(void *pvParameters);
 static void Init_Hardware(void);
 static esp_err_t init_camera(void);
-static void read_uart(void *arg);
+static void read_uart(void *pvParameters);
 static uint32_t GetMQ4Value(uint8_t *buf);
 static void http_get_task(void *pvParameters);
 static void camera_task(void *pvParameters);
+static void https_telegram_getMe_perform(void);
+static void https_telegram_sendMessage_perform_post(char *message);
+static void http_telegram_task(void *pvParameters);
+esp_err_t _http_event_handler(esp_http_client_event_t *evt);
 
 httpd_uri_t uri_get = {
     .uri = "/",
@@ -51,14 +66,27 @@ void app_main()
 {
     Init_Hardware();
     connect_wifi(); 
-	xTaskCreate(&camera_task, "camera task", 1024*3, NULL, 3, NULL);        
+	xTaskCreate(&camera_task, "camera task", 1024*4, NULL, 3, NULL);
 	xTaskCreate(&read_uart, "UART task", 1024*3, NULL, 3, NULL);        
     xTaskCreate(&http_get_task, "http_get_task", 1024*4, NULL, 3, NULL);
+    xTaskCreate(&http_telegram_task, "http_telegram_task", 8192*4, NULL, 3, NULL);
+
 }
+
+static void http_telegram_task(void *pvParameters)
+{   
+    strcat(url_string, TOKEN);
+    https_telegram_sendMessage_perform_post("-r TEST from \n-u ESPCAM!! ");
+    // https_telegram_getMe_perform();
+    https_telegram_sendMessage_perform_post("-n TEST from \n-a STM32!!");
+    vTaskDelete(NULL);
+}
+
 static void camera_task(void *pvParameters)
 {
     if (wifi_connect_status){
         ESP_ERROR_CHECK(init_camera());
+        printf("Init camera successfully!\n");
         httpd_handle_t stream_httpd = setup_server();
         ESP_LOGI(TAG, "Web Server is up and running\n");
     }else{
@@ -93,10 +121,12 @@ static void Init_Hardware(void){
     gpio_set_direction(LED, GPIO_MODE_OUTPUT);
     // Initialize NVS
     esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND){
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+      ESP_ERROR_CHECK(nvs_flash_erase());
+      ret = nvs_flash_init();
     }
+    ESP_ERROR_CHECK(ret);
+
     //Install UART driver, and get the queue.
     uart_driver_install(EX_UART_NUM, BUF_SIZE * 2, BUF_SIZE * 2, 20, NULL, 0);
     uart_param_config(EX_UART_NUM, &(uart_config_t) {
@@ -217,6 +247,8 @@ esp_err_t jpg_stream_httpd_handler(httpd_req_t *req){
     last_frame = 0;
     return res;
 }
+
+
 static uint32_t GetMQ4Value(uint8_t *buf)
 {
     return ((uint32_t)buf[2] << 24) | ((uint32_t)buf[3] << 16) | ((uint32_t)buf[4] << 8) | ((uint32_t)buf[5] << 0);
@@ -272,8 +304,12 @@ static void http_get_task(void *pvParameters)
         //     uint32_t hum_  = data[1];
         //     uint32_t MQ4_  = data[2];
         // }
+
+        uint32_t temp_ = 60;
+        uint32_t hum_  = 50;
+        uint32_t MQ4_  = 200;
         // sprintf(REQUEST, "GET http://api.thingspeak.com/update.json?api_key=HHLZA8LPCME8DHX3&field1=%d&field2=%d&field3=%d\n\n", temp_, hum_, MQ4_);
-        sprintf(REQUEST, "GET http://api.thingspeak.com/update.json?api_key=0FHA4BWA7O4MEUYU&field1=%ld&field2=%ld&field3=%ld\n\n", (long int)99, (long int)99, (long int)1034);
+        sprintf(REQUEST, "GET http://api.thingspeak.com/update.json?api_key=0FHA4BWA7O4MEUYU&field1=%ld&field2=%ld&field3=%ld\n\n", (long int)temp_, (long int)hum_, (long int)MQ4_);
 
         if (write(s, REQUEST, strlen(REQUEST)) < 0) {
             ESP_LOGE(TAG, "... socket send failed");
@@ -312,4 +348,134 @@ static void http_get_task(void *pvParameters)
         }
         ESP_LOGI(TAG, "Starting again!");
     }
+}
+
+
+static void https_telegram_getMe_perform(void) {
+	char buffer[HTTP_MAX_BUf] = {0};   // Buffer to store response of http request
+	char url[512] = "";
+    esp_http_client_config_t config = {
+        .url = "https://api.telegram.org",
+        .transport_type = HTTP_TRANSPORT_OVER_SSL,
+        .event_handler = _http_event_handler,
+        .cert_pem = telegram_certificate_pem_start,
+        .user_data = buffer,        // Pass address of local buffer to get response
+    };
+    /* Creating the string of the url*/
+    //Copy the URL + TOKEN
+    strcat(url, url_string);
+    //Adding the method
+    strcat(url,"/getMe");
+
+    esp_http_client_handle_t client = esp_http_client_init(&config);
+    esp_http_client_set_url(client, url);
+    esp_http_client_set_method(client, HTTP_METHOD_GET);
+    esp_err_t err = esp_http_client_perform(client);
+
+    if (err == ESP_OK) {
+        printf("HTTPS Status = %d, content_length = %lld",
+                esp_http_client_get_status_code(client),
+                esp_http_client_get_content_length(client));
+        printf("Output: %s",buffer);
+    } else {
+        printf("Error perform http request %s", esp_err_to_name(err));
+    }
+    esp_http_client_close(client);
+    esp_http_client_cleanup(client);
+}
+
+static void https_telegram_sendMessage_perform_post(char *message) {
+	char url[512] = "";
+    char output_buffer[HTTP_MAX_BUf] = {0};   // Buffer to store response of http request
+    esp_http_client_config_t config = {
+        .url = "https://api.telegram.org",
+        .transport_type = HTTP_TRANSPORT_OVER_SSL,
+        .event_handler = _http_event_handler,
+        .cert_pem = telegram_certificate_pem_start,
+		.user_data = output_buffer,
+    };
+    esp_http_client_handle_t client = esp_http_client_init(&config);
+    strcat(url,url_string);
+    strcat(url,"/sendMessage");
+    esp_http_client_set_url(client, url);
+	char post_data[512] = "";
+	sprintf(post_data,"{\"chat_id\":%s,\"text\":\"%s\"}",CHAT_ID, message);
+    esp_http_client_set_method(client, HTTP_METHOD_POST);
+    esp_http_client_set_header(client, "Content-Type", "application/json");
+    esp_http_client_set_post_field(client, post_data, strlen(post_data));
+    esp_err_t err = esp_http_client_perform(client);
+    esp_http_client_close(client);
+    esp_http_client_cleanup(client);
+}
+
+esp_err_t _http_event_handler(esp_http_client_event_t *evt) {
+    static char *output_buffer;  // Buffer to store response of http request from event handler
+    static int output_len;       // Stores number of bytes read
+    switch(evt->event_id) {
+        case HTTP_EVENT_ERROR:
+            printf("HTTP_EVENT_ERROR");
+            break;
+        case HTTP_EVENT_ON_CONNECTED:
+            printf("HTTP_EVENT_ON_CONNECTED");
+            break;
+        case HTTP_EVENT_HEADER_SENT:
+            printf("HTTP_EVENT_HEADER_SENT");
+            break;
+        case HTTP_EVENT_ON_HEADER:
+            printf("HTTP_EVENT_ON_HEADER, key=%s, value=%s", evt->header_key, evt->header_value);
+            break;
+        case HTTP_EVENT_ON_DATA:
+            printf("HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
+            /*
+             *  Check for chunked encoding is added as the URL for chunked encoding used in this example returns binary data.
+             *  However, event handler can also be used in case chunked encoding is used.
+             */
+            if (!esp_http_client_is_chunked_response(evt->client)) {
+                // If user_data buffer is configured, copy the response into the buffer
+                if (evt->user_data) {
+                    memcpy(evt->user_data + output_len, evt->data, evt->data_len);
+                } else {
+                    if (output_buffer == NULL) {
+                        output_buffer = (char *) malloc(esp_http_client_get_content_length(evt->client));
+                        output_len = 0;
+                        if (output_buffer == NULL) {
+                            printf("Failed to allocate memory for output buffer");
+                            return ESP_FAIL;
+                        }
+                    }
+                    memcpy(output_buffer + output_len, evt->data, evt->data_len);
+                }
+                output_len += evt->data_len;
+            }
+
+            break;
+        case HTTP_EVENT_ON_FINISH:
+            printf("HTTP_EVENT_ON_FINISH");
+            if (output_buffer != NULL) {
+                // Response is accumulated in output_buffer. Uncomment the below line to print the accumulated response
+                // ESP_LOG_BUFFER_HEX(TAG, output_buffer, output_len);
+                free(output_buffer);
+                output_buffer = NULL;
+            }
+            output_len = 0;
+            break;
+        case HTTP_EVENT_DISCONNECTED:
+            printf("HTTP_EVENT_DISCONNECTED");
+            int mbedtls_err = 0;
+            esp_err_t err = esp_tls_get_and_clear_last_error(evt->data, &mbedtls_err, NULL);
+            if (err != 0) {
+                if (output_buffer != NULL) {
+                    free(output_buffer);
+                    output_buffer = NULL;
+                }
+                output_len = 0;
+                printf("Last esp error code: 0x%x", err);
+                printf("Last mbedtls failure: 0x%x", mbedtls_err);
+            }
+            break;
+        case HTTP_EVENT_REDIRECT:
+        default:
+            break;
+    }
+    return ESP_OK;
 }

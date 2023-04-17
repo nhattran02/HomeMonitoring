@@ -1,4 +1,4 @@
-# Install script for directory: C:/esp/Espressif/frameworks/ESP32-Cam-IDF-Driver-/main
+# Install script for directory: C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
