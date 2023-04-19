@@ -8,6 +8,7 @@ $<TARGET_FILE:__idf_esp_app_format>
 $<TARGET_FILE:__idf_bootloader_support>
 $<TARGET_FILE:__idf_esp_partition>
 $<TARGET_FILE:__idf_app_update>
+$<TARGET_FILE:__idf_esp_mm>
 $<TARGET_FILE:__idf_spi_flash>
 $<TARGET_FILE:__idf_pthread>
 $<TARGET_FILE:__idf_esp_system>

@@ -1,0 +1,79 @@
+[1/10] Performing build step for 'bootloader'
+[1/1] cd /home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/build/bootloader/esp-idf/esptool_py && /home/minhnhat/.espressif/python_env/idf5.1_py3.8_env/bin/python /home/minhnhat/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 /home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/build/bootloader/bootloader.bin
+Bootloader binary size 0x6730 bytes. 0x8d0 bytes (8%) free.
+[2/8] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/main.c.obj
+../main/main.c: In function 'camera_task':
+../main/main.c:103:24: warning: unused variable 'stream_httpd' [-Wunused-variable]
+  103 |         httpd_handle_t stream_httpd = setup_server();
+      |                        ^~~~~~~~~~~~
+../main/main.c: In function 'take_photo':
+../main/main.c:274:13: warning: unused variable 'fr_start' [-Wunused-variable]
+  274 |     int64_t fr_start = esp_timer_get_time();
+      |             ^~~~~~~~
+../main/main.c:273:12: warning: unused variable 'part_buf' [-Wunused-variable]
+  273 |     char * part_buf[64];
+      |            ^~~~~~~~
+../main/main.c:272:15: warning: unused variable '_jpg_buf' [-Wunused-variable]
+  272 |     uint8_t * _jpg_buf;
+      |               ^~~~~~~~
+../main/main.c:271:12: warning: variable '_jpg_buf_len' set but not used [-Wunused-but-set-variable]
+  271 |     size_t _jpg_buf_len;
+      |            ^~~~~~~~~~~~
+../main/main.c: In function 'http_get_thingspeak_task':
+../main/main.c:315:14: warning: unused variable 'MQ4_' [-Wunused-variable]
+  315 |     uint32_t MQ4_  = 0;
+      |              ^~~~
+../main/main.c:314:14: warning: unused variable 'hum_' [-Wunused-variable]
+  314 |     uint32_t hum_  = 0;
+      |              ^~~~
+../main/main.c:313:14: warning: unused variable 'temp_' [-Wunused-variable]
+  313 |     uint32_t temp_ = 0;
+      |              ^~~~~
+../main/main.c:312:14: warning: unused variable 'data' [-Wunused-variable]
+  312 |     uint32_t data[3];
+      |              ^~~~
+../main/main.c: In function 'telegram_send_message':
+../main/main.c:516:15: warning: unused variable 'err' [-Wunused-variable]
+  516 |     esp_err_t err = esp_http_client_perform(client);
+      |               ^~~
+../main/main.c: In function 'telegram_send_picture':
+../main/main.c:526:13: warning: unused variable 'fr_start' [-Wunused-variable]
+  526 |     int64_t fr_start = esp_timer_get_time();
+      |             ^~~~~~~~
+../main/main.c:525:12: warning: unused variable 'part_buf' [-Wunused-variable]
+  525 |     char * part_buf[64];
+      |            ^~~~~~~~
+../main/main.c:524:15: warning: unused variable '_jpg_buf' [-Wunused-variable]
+  524 |     uint8_t * _jpg_buf;
+      |               ^~~~~~~~
+../main/main.c:523:12: warning: unused variable '_jpg_buf_len' [-Wunused-variable]
+  523 |     size_t _jpg_buf_len;
+      |            ^~~~~~~~~~~~
+../main/main.c:522:15: warning: unused variable 'res' [-Wunused-variable]
+  522 |     esp_err_t res = ESP_OK;
+      |               ^~~
+../main/main.c:521:19: warning: variable 'fb' set but not used [-Wunused-but-set-variable]
+  521 |     camera_fb_t * fb = NULL;
+      |                   ^~
+../main/main.c: At top level:
+../main/main.c:49:13: warning: 'uart_event_task' declared 'static' but never defined [-Wunused-function]
+   49 | static void uart_event_task(void *pvParameters);
+      |             ^~~~~~~~~~~~~~~
+../main/main.c:519:13: warning: 'telegram_send_picture' defined but not used [-Wunused-function]
+  519 | static void telegram_send_picture(esp_http_client_handle_t client)
+      |             ^~~~~~~~~~~~~~~~~~~~~
+../main/main.c:37:22: warning: 'queue_leak_gas' defined but not used [-Wunused-variable]
+   37 | static QueueHandle_t queue_leak_gas;
+      |                      ^~~~~~~~~~~~~~
+[3/8] Linking C static library esp-idf/main/libmain.a
+[4/8] Generating ld/sections.ld
+[5/8] Building C object CMakeFiles/esp32_cam_http_stream.elf.dir/project_elf_src_esp32.c.obj
+[6/8] Linking CXX executable esp32_cam_http_stream.elf
+[7/8] Generating binary image from built executable
+esptool.py v4.5.dev2
+Creating esp32 image...
+Merged 25 ELF sections
+Successfully created esp32 image.
+Generated /home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/build/esp32_cam_http_stream.bin
+[8/8] cd /home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/build/esp-idf/esptool_py && /home/minhnhat/.espressif/python_env/idf5.1_py3.8_env/bin/python /home/minhnhat/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/build/partition_table/partition-table.bin /home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/build/esp32_cam_http_stream.bin
+esp32_cam_http_stream.bin binary size 0x1072c0 bytes. Smallest app partition is 0x200000 bytes. 0xf8d40 bytes (49%) free.

@@ -60,7 +60,7 @@ esp_http_client_handle_t telegram_picture_start(void);
 static void telegram_task(void *pvParameters);
 static void telegram_message_stop(esp_http_client_handle_t client);
 static void telegram_send_message(esp_http_client_handle_t client, char *message);
-static void telegram_send_picture(esp_http_client_handle_t client, camera_fb_t *fb);
+static void telegram_send_picture(esp_http_client_handle_t client);
 
 esp_err_t _http_event_handler(esp_http_client_event_t *evt);
 esp_err_t take_photo(httpd_req_t *req);
@@ -89,9 +89,9 @@ static void telegram_task(void *pvParameters)
     strcat(url_string, TOKEN);
     esp_http_client_handle_t client = telegram_message_start();
 
-    telegram_send_message(client, "I am a Camera BOT");
+    telegram_send_message(client, "Minh Nhat");
 
-    telegram_message_stop(client);
+    // telegram_message_stop(client);
     vTaskDelete(NULL);
 }
 
@@ -117,7 +117,7 @@ static void read_uart(void *pvParameters)
     uint8_t buff[RD_BUF_SIZE];
     bzero(buff, RD_BUF_SIZE);
     while(1){
-        if(uart_read_bytes(EX_UART_NUM, buff, RD_BUF_SIZE, 2000 / portTICK_PERIOD_MS) > 0){
+        if(uart_read_bytes(EX_UART_NUM, buff, RD_BUF_SIZE, 0) > 0){
             temp = buff[0];
             hum = buff[1];
             MQ4 = GetMQ4Value(buff);
@@ -125,7 +125,7 @@ static void read_uart(void *pvParameters)
             if(xQueueSend(queue_data, (void*)data, 0) != pdTRUE){
                 printf("Failed to send data to queue!\n");
             }
-            printf("- Temp: %d \n- Hum: %d \n- MQ4: %ld \n\n", temp, hum, MQ4);
+            // printf("- Temp: %d \n- Hum: %d \n- MQ4: %ld \n\n", temp, hum, MQ4);
         }
         vTaskDelay(10/portTICK_PERIOD_MS);
     }
@@ -299,7 +299,6 @@ static uint32_t GetMQ4Value(uint8_t *buf)
     return ((uint32_t)buf[2] << 24) | ((uint32_t)buf[3] << 16) | ((uint32_t)buf[4] << 8) | ((uint32_t)buf[5] << 0);
 }
 
-
 static void http_get_thingspeak_task(void *pvParameters)
 {
     const struct addrinfo hints = {
@@ -308,94 +307,74 @@ static void http_get_thingspeak_task(void *pvParameters)
     };
     struct addrinfo *res;
     struct in_addr *addr;
-    int s, r;  
+    int s, r;
     uint32_t data[3];
     uint32_t temp_ = 0;
-    uint32_t hum_  = 0;
-    uint32_t MQ4_  = 0;
-    while(1) {
-        int err = getaddrinfo(WEB_SERVER, WEB_PORT, &hints, &res);
+    uint32_t hum_ = 0;
+    uint32_t MQ4_ = 0;
+    while (1)
+    {
+      int err = getaddrinfo(WEB_SERVER, WEB_PORT, &hints, &res);
 
-        if(err != 0 || res == NULL) {
+      if (err != 0 || res == NULL)
+      {
             ESP_LOGE(TAG, "DNS lookup failed err=%d res=%p", err, res);
             vTaskDelay(1000 / portTICK_PERIOD_MS);
             continue;
-        }
+      }
+      addr = &((struct sockaddr_in *)res->ai_addr)->sin_addr;
+      ESP_LOGI(TAG, "DNS lookup succeeded. IP=%s", inet_ntoa(*addr));
 
-        /* Code to print the resolved IP.
-        Note: inet_ntoa is non-reentrant, look at ipaddr_ntoa_r for "real" code */
-        addr = &((struct sockaddr_in *)res->ai_addr)->sin_addr;
-        ESP_LOGI(TAG, "DNS lookup succeeded. IP=%s", inet_ntoa(*addr));
-
-        s = socket(res->ai_family, res->ai_socktype, 0);
-        if(s < 0) {
+      s = socket(res->ai_family, res->ai_socktype, 0);
+      if (s < 0)
+      {
             ESP_LOGE(TAG, "... Failed to allocate socket.");
             freeaddrinfo(res);
             vTaskDelay(1000 / portTICK_PERIOD_MS);
             continue;
-        }
-        ESP_LOGI(TAG, "... allocated socket");
+      }
+      ESP_LOGI(TAG, "... allocated socket");
 
-        if(connect(s, res->ai_addr, res->ai_addrlen) != 0) {
+      if (connect(s, res->ai_addr, res->ai_addrlen) != 0)
+      {
             ESP_LOGE(TAG, "... socket connect failed errno=%d", errno);
             close(s);
             freeaddrinfo(res);
             vTaskDelay(4000 / portTICK_PERIOD_MS);
             continue;
-        }
-        ESP_LOGI(TAG, "... connected");
-        freeaddrinfo(res);
-        // if(xQueueReceive(queue_data, data, portMAX_DELAY) == pdTRUE){
-        //     uint32_t temp_ = data[0];
-        //     uint32_t hum_  = data[1];
-        //     uint32_t MQ4_  = data[2];
-        // }
-
-        uint32_t temp_ = 60;
-        uint32_t hum_  = 50;
-        uint32_t MQ4_  = 200;
-        // sprintf(REQUEST, "GET http://api.thingspeak.com/update.json?api_key=HHLZA8LPCME8DHX3&field1=%d&field2=%d&field3=%d\n\n", temp_, hum_, MQ4_);
-        sprintf(REQUEST, "GET http://api.thingspeak.com/update.json?api_key=0FHA4BWA7O4MEUYU&field1=%ld&field2=%ld&field3=%ld\n\n", (long int)temp_, (long int)hum_, (long int)MQ4_);
-
-        if (write(s, REQUEST, strlen(REQUEST)) < 0) {
-            ESP_LOGE(TAG, "... socket send failed");
-            close(s);
-            vTaskDelay(4000 / portTICK_PERIOD_MS);
-            continue;
-        }
-        ESP_LOGI(TAG, "... socket send success");
-
-        struct timeval receiving_timeout;
-        receiving_timeout.tv_sec = 5;
-        receiving_timeout.tv_usec = 0;
-        if (setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &receiving_timeout,
-                sizeof(receiving_timeout)) < 0) {
-            ESP_LOGE(TAG, "... failed to set socket receiving timeout");
-            close(s);
-            vTaskDelay(4000 / portTICK_PERIOD_MS);
-            continue;
-        }
-        ESP_LOGI(TAG, "... set socket receiving timeout success");
-
-        /* Read HTTP response */
-        do {
-            bzero(recv_buf, sizeof(recv_buf));
-            r = read(s, recv_buf, sizeof(recv_buf)-1);
-            for(int i = 0; i < r; i++) {
-                putchar(recv_buf[i]);
+      }
+      ESP_LOGI(TAG, "... connected");
+      freeaddrinfo(res);
+      if (xQueueReceive(queue_data, data, portMAX_DELAY) == pdTRUE)
+      {
+            uint32_t temp_ = data[0];
+            uint32_t hum_ = data[1];
+            uint32_t MQ4_ = data[2];
+            printf("\nThingspeak:\n- Temp: %ld \n- Hum: %ld \n- MQ4: %ld \n\n", temp_, hum_, MQ4_);
+            sprintf(REQUEST, "GET http://api.thingspeak.com/update.json?api_key=0FHA4BWA7O4MEUYU&field1=%ld&field2=%ld&field3=%ld\n\n", (long int)temp_, (long int)hum_, (long int)MQ4_);
+            if (write(s, REQUEST, strlen(REQUEST)) < 0){
+                  ESP_LOGE(TAG, "... socket send failed");
+                  close(s);
+                  vTaskDelay(10 / portTICK_PERIOD_MS); //4000
+                  continue;
+            }           
+            ESP_LOGI(TAG, "... socket send success"); 
+            struct timeval receiving_timeout;
+            receiving_timeout.tv_sec = 0; //5
+            receiving_timeout.tv_usec = 0;
+            if (setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &receiving_timeout,
+                           sizeof(receiving_timeout)) < 0)
+            {
+                  ESP_LOGE(TAG, "... failed to set socket receiving timeout");
+                  close(s);
+                  vTaskDelay(100 / portTICK_PERIOD_MS); //4000
+                  continue;
             }
-        } while(r > 0);
-
-        ESP_LOGI(TAG, "... done reading from socket. Last read return=%d errno=%d.", r, errno);
-        close(s);
-        for(int countdown = 10; countdown >= 0; countdown--) {
-            ESP_LOGI(TAG, "%d... ", countdown);
-            vTaskDelay(100 / portTICK_PERIOD_MS);
-        }
-        ESP_LOGI(TAG, "Starting again!");
+            ESP_LOGI(TAG, "... set socket receiving timeout success");
+            close(s);
+      }
     }
 }
-
 
 esp_http_client_handle_t telegram_message_start(void) 
 {
@@ -439,19 +418,19 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
     static int output_len;       // Stores number of bytes read
     switch(evt->event_id) {
         case HTTP_EVENT_ERROR:
-            printf("HTTP_EVENT_ERROR");
+            printf("HTTP_EVENT_ERROR\n");
             break;
         case HTTP_EVENT_ON_CONNECTED:
-            printf("HTTP_EVENT_ON_CONNECTED");
+            printf("HTTP_EVENT_ON_CONNECTED\n");
             break;
         case HTTP_EVENT_HEADER_SENT:
-            printf("HTTP_EVENT_HEADER_SENT");
+            printf("HTTP_EVENT_HEADER_SENT\n");
             break;
         case HTTP_EVENT_ON_HEADER:
-            printf("HTTP_EVENT_ON_HEADER, key=%s, value=%s", evt->header_key, evt->header_value);
+            printf("HTTP_EVENT_ON_HEADER, key=%s, value=%s\n", evt->header_key, evt->header_value);
             break;
         case HTTP_EVENT_ON_DATA:
-            printf("HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
+            printf("HTTP_EVENT_ON_DATA, len=%d\n", evt->data_len);
             /*
              *  Check for chunked encoding is added as the URL for chunked encoding used in this example returns binary data.
              *  However, event handler can also be used in case chunked encoding is used.
@@ -465,7 +444,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
                         output_buffer = (char *) malloc(esp_http_client_get_content_length(evt->client));
                         output_len = 0;
                         if (output_buffer == NULL) {
-                            printf("Failed to allocate memory for output buffer");
+                            printf("Failed to allocate memory for output buffer\n");
                             return ESP_FAIL;
                         }
                     }
@@ -476,7 +455,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 
             break;
         case HTTP_EVENT_ON_FINISH:
-            printf("HTTP_EVENT_ON_FINISH");
+            printf("HTTP_EVENT_ON_FINISH\n");
             if (output_buffer != NULL) {
                 // Response is accumulated in output_buffer. Uncomment the below line to print the accumulated response
                 // ESP_LOG_BUFFER_HEX(TAG, output_buffer, output_len);
@@ -486,7 +465,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             output_len = 0;
             break;
         case HTTP_EVENT_DISCONNECTED:
-            printf("HTTP_EVENT_DISCONNECTED");
+            printf("HTTP_EVENT_DISCONNECTED\n");
             int mbedtls_err = 0;
             esp_err_t err = esp_tls_get_and_clear_last_error(evt->data, &mbedtls_err, NULL);
             if (err != 0) {
@@ -495,8 +474,8 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
                     output_buffer = NULL;
                 }
                 output_len = 0;
-                printf("Last esp error code: 0x%x", err);
-                printf("Last mbedtls failure: 0x%x", mbedtls_err);
+                printf("Last esp error code: 0x%x\n", err);
+                printf("Last mbedtls failure: 0x%x\n", mbedtls_err);
             }
             break;
         case HTTP_EVENT_REDIRECT:
