@@ -87,12 +87,19 @@ void app_main()
 static void telegram_task(void *pvParameters)
 {   
     strcat(url_string, TOKEN);
+    uint32_t data[3];
     esp_http_client_handle_t client = telegram_message_start();
-
-    telegram_send_message(client, "Minh Nhat");
+    while(1){
+        if (xQueueReceive(queue_data, data, portMAX_DELAY) == pdTRUE){
+            if(data[2] > 900){
+                telegram_send_message(client, "Gas Leak Detection!!!");
+            }
+        }
+        vTaskDelay(10/portTICK_PERIOD_MS);
+    }
 
     // telegram_message_stop(client);
-    vTaskDelete(NULL);
+    // vTaskDelete(NULL);
 }
 
 static void camera_task(void *pvParameters)
@@ -202,67 +209,67 @@ static esp_err_t init_camera(void)
     return ESP_OK;
 }
 
-esp_err_t jpg_stream_httpd_handler(httpd_req_t *req){
-    camera_fb_t * fb = NULL;
-    esp_err_t res = ESP_OK;
-    size_t _jpg_buf_len;
-    uint8_t * _jpg_buf;
-    char * part_buf[64];
-    static int64_t last_frame = 0;
-    if(!last_frame) {
-        last_frame = esp_timer_get_time();
-    }
-    res = httpd_resp_set_type(req, _STREAM_CONTENT_TYPE);
-    if(res != ESP_OK){
-        return res;
-    }
+// esp_err_t jpg_stream_httpd_handler(httpd_req_t *req){
+//     camera_fb_t * fb = NULL;
+//     esp_err_t res = ESP_OK;
+//     size_t _jpg_buf_len;
+//     uint8_t * _jpg_buf;
+//     char * part_buf[64];
+//     static int64_t last_frame = 0;
+//     if(!last_frame) {
+//         last_frame = esp_timer_get_time();
+//     }
+//     res = httpd_resp_set_type(req, _STREAM_CONTENT_TYPE);
+//     if(res != ESP_OK){
+//         return res;
+//     }
 
-    while(true){
-        fb = esp_camera_fb_get();
-        if (!fb) {
-            ESP_LOGE(TAG, "Camera capture failed");
-            res = ESP_FAIL;
-            break;
-        }
-        if(fb->format != PIXFORMAT_JPEG){
-            bool jpeg_converted = frame2jpg(fb, 80, &_jpg_buf, &_jpg_buf_len);
-            if(!jpeg_converted){
-                ESP_LOGE(TAG, "JPEG compression failed");
-                esp_camera_fb_return(fb);
-                res = ESP_FAIL;
-            }
-        } else {
+//     while(true){
+//         fb = esp_camera_fb_get();
+//         if (!fb) {
+//             ESP_LOGE(TAG, "Camera capture failed");
+//             res = ESP_FAIL;
+//             break;
+//         }
+//         if(fb->format != PIXFORMAT_JPEG){
+//             bool jpeg_converted = frame2jpg(fb, 80, &_jpg_buf, &_jpg_buf_len);
+//             if(!jpeg_converted){
+//                 ESP_LOGE(TAG, "JPEG compression failed");
+//                 esp_camera_fb_return(fb);
+//                 res = ESP_FAIL;
+//             }
+//         } else {
 
-            _jpg_buf_len = fb->len;
-            _jpg_buf = fb->buf;
-        }
+//             _jpg_buf_len = fb->len;
+//             _jpg_buf = fb->buf;
+//         }
 
-        if(res == ESP_OK){
-            res = httpd_resp_send_chunk(req, _STREAM_BOUNDARY, strlen(_STREAM_BOUNDARY));
-        }
-        if(res == ESP_OK){
-            size_t hlen = snprintf((char *)part_buf, 64, _STREAM_PART, _jpg_buf_len);
+//         if(res == ESP_OK){
+//             res = httpd_resp_send_chunk(req, _STREAM_BOUNDARY, strlen(_STREAM_BOUNDARY));
+//         }
+//         if(res == ESP_OK){
+//             size_t hlen = snprintf((char *)part_buf, 64, _STREAM_PART, _jpg_buf_len);
 
-            res = httpd_resp_send_chunk(req, (const char *)part_buf, hlen);
-        }
-        if(res == ESP_OK){
-            res = httpd_resp_send_chunk(req, (const char *)_jpg_buf, _jpg_buf_len);
-        }
-        if(fb->format != PIXFORMAT_JPEG){
-            free(_jpg_buf);
-        }
-        esp_camera_fb_return(fb);
-        if(res != ESP_OK){
-            break;
-        }
-        int64_t fr_end = esp_timer_get_time();
-        int64_t frame_time = fr_end - last_frame;
-        last_frame = fr_end;
-        frame_time /= 1000;
-    }
-    last_frame = 0;
-    return res;
-}
+//             res = httpd_resp_send_chunk(req, (const char *)part_buf, hlen);
+//         }
+//         if(res == ESP_OK){
+//             res = httpd_resp_send_chunk(req, (const char *)_jpg_buf, _jpg_buf_len);
+//         }
+//         if(fb->format != PIXFORMAT_JPEG){
+//             free(_jpg_buf);
+//         }
+//         esp_camera_fb_return(fb);
+//         if(res != ESP_OK){
+//             break;
+//         }
+//         int64_t fr_end = esp_timer_get_time();
+//         int64_t frame_time = fr_end - last_frame;
+//         last_frame = fr_end;
+//         frame_time /= 1000;
+//     }
+//     last_frame = 0;
+//     return res;
+// }
 
 esp_err_t take_photo(httpd_req_t *req)
 {
@@ -309,54 +316,48 @@ static void http_get_thingspeak_task(void *pvParameters)
     struct in_addr *addr;
     int s, r;
     uint32_t data[3];
-    uint32_t temp_ = 0;
-    uint32_t hum_ = 0;
-    uint32_t MQ4_ = 0;
+    uint32_t temp_ = 0, hum_ = 0, MQ4_ = 0;
     while (1)
     {
-      int err = getaddrinfo(WEB_SERVER, WEB_PORT, &hints, &res);
-
-      if (err != 0 || res == NULL)
-      {
+        int err = getaddrinfo(WEB_SERVER, WEB_PORT, &hints, &res);
+        if (err != 0 || res == NULL){
             ESP_LOGE(TAG, "DNS lookup failed err=%d res=%p", err, res);
             vTaskDelay(1000 / portTICK_PERIOD_MS);
             continue;
-      }
-      addr = &((struct sockaddr_in *)res->ai_addr)->sin_addr;
-      ESP_LOGI(TAG, "DNS lookup succeeded. IP=%s", inet_ntoa(*addr));
+        }
+        addr = &((struct sockaddr_in *)res->ai_addr)->sin_addr;
+        ESP_LOGI(TAG, "DNS lookup succeeded. IP=%s", inet_ntoa(*addr));
 
-      s = socket(res->ai_family, res->ai_socktype, 0);
-      if (s < 0)
-      {
+        s = socket(res->ai_family, res->ai_socktype, 0);
+        if (s < 0){
             ESP_LOGE(TAG, "... Failed to allocate socket.");
             freeaddrinfo(res);
             vTaskDelay(1000 / portTICK_PERIOD_MS);
             continue;
-      }
-      ESP_LOGI(TAG, "... allocated socket");
+        }
+        ESP_LOGI(TAG, "... allocated socket");
 
-      if (connect(s, res->ai_addr, res->ai_addrlen) != 0)
-      {
+        if (connect(s, res->ai_addr, res->ai_addrlen) != 0){
             ESP_LOGE(TAG, "... socket connect failed errno=%d", errno);
             close(s);
             freeaddrinfo(res);
             vTaskDelay(4000 / portTICK_PERIOD_MS);
             continue;
-      }
-      ESP_LOGI(TAG, "... connected");
-      freeaddrinfo(res);
-      if (xQueueReceive(queue_data, data, portMAX_DELAY) == pdTRUE)
-      {
-            uint32_t temp_ = data[0];
-            uint32_t hum_ = data[1];
-            uint32_t MQ4_ = data[2];
-            printf("\nThingspeak:\n- Temp: %ld \n- Hum: %ld \n- MQ4: %ld \n\n", temp_, hum_, MQ4_);
+        }
+        ESP_LOGI(TAG, "... connected");
+        freeaddrinfo(res);
+
+        if (xQueueReceive(queue_data, data, portMAX_DELAY) == pdTRUE){
+            temp_ = data[0];
+            hum_  = data[1];
+            MQ4_  = data[2];
+            printf("\nValue send to Thingspeak:\n- Temp: %ld \n- Hum: %ld \n- MQ4: %ld \n\n", temp_, hum_, MQ4_);
             sprintf(REQUEST, "GET http://api.thingspeak.com/update.json?api_key=0FHA4BWA7O4MEUYU&field1=%ld&field2=%ld&field3=%ld\n\n", (long int)temp_, (long int)hum_, (long int)MQ4_);
             if (write(s, REQUEST, strlen(REQUEST)) < 0){
-                  ESP_LOGE(TAG, "... socket send failed");
-                  close(s);
-                  vTaskDelay(10 / portTICK_PERIOD_MS); //4000
-                  continue;
+                ESP_LOGE(TAG, "... socket send failed");
+                close(s);
+                vTaskDelay(10 / portTICK_PERIOD_MS); //4000
+                continue;
             }           
             ESP_LOGI(TAG, "... socket send success"); 
             struct timeval receiving_timeout;
@@ -365,14 +366,30 @@ static void http_get_thingspeak_task(void *pvParameters)
             if (setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &receiving_timeout,
                            sizeof(receiving_timeout)) < 0)
             {
-                  ESP_LOGE(TAG, "... failed to set socket receiving timeout");
-                  close(s);
-                  vTaskDelay(100 / portTICK_PERIOD_MS); //4000
-                  continue;
+                ESP_LOGE(TAG, "... failed to set socket receiving timeout");
+                close(s);
+                vTaskDelay(100 / portTICK_PERIOD_MS); //4000
+                continue;
             }
             ESP_LOGI(TAG, "... set socket receiving timeout success");
+
+            /* Read HTTP response */
+            do {
+                bzero(recv_buf, sizeof(recv_buf));
+                r = read(s, recv_buf, sizeof(recv_buf)-1);
+                for(int i = 0; i < r; i++) {
+                    putchar(recv_buf[i]);
+                }
+            } while(r > 0);
+            ESP_LOGI(TAG, "... done reading from socket. Last read return=%d errno=%d.", r, errno);
             close(s);
-      }
+            
+        }
+        /*delay 15s for thingspeak receive data*/
+        for(int countdown = 15; countdown > 0; countdown--) {
+            ESP_LOGI(TAG, "%d... ", countdown);
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+        }
     }
 }
 
@@ -488,7 +505,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 static void telegram_send_message(esp_http_client_handle_t client, char *message)
 {
     char post_data[512] = "";
-	sprintf(post_data,"{\"chat_id\":%s,\"text\":\"%s\"}",CHAT_ID, message);
+	sprintf(post_data, "{\"chat_id\":%s,\"text\":\"%s\"}", CHAT_ID, message);
     esp_http_client_set_method(client, HTTP_METHOD_POST);
     esp_http_client_set_header(client, "Content-Type", "application/json");
     esp_http_client_set_post_field(client, post_data, strlen(post_data));

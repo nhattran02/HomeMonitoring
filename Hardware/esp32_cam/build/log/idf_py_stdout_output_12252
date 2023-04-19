@@ -1,0 +1,76 @@
+[1/5] cmd.exe /C "cd /D C:\esp\Espressif\frameworks\HomeMonitoring\Hardware\esp32_cam\build\esp-idf\esptool_py && C:\esp\Espressif\python_env\idf5.0_py3.8_env\Scripts\python.exe C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/partition_table/check_sizes.py --offset 0x8000 partition --type app C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/build/partition_table/partition-table.bin C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/build/esp32_cam_http_stream.bin"
+esp32_cam_http_stream.bin binary size 0x101080 bytes. Smallest app partition is 0x200000 bytes. 0xfef80 bytes (50%) free.
+[2/5] Performing build step for 'bootloader'
+[1/1] cmd.exe /C "cd /D C:\esp\Espressif\frameworks\HomeMonitoring\Hardware\esp32_cam\build\bootloader\esp-idf\esptool_py && C:\esp\Espressif\python_env\idf5.0_py3.8_env\Scripts\python.exe C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/build/bootloader/bootloader.bin"
+Bootloader binary size 0x6710 bytes. 0x8f0 bytes (8%) free.
+[2/3] cmd.exe /C "cd /D C:\esp\Espressif\frameworks\esp-idf-v5.0.1\components\esptool_py && C:\esp\Espressif\tools\cmake\3.24.0\bin\cmake.exe -D IDF_PATH=C:/esp/Espressif/frameworks/esp-idf-v5.0.1 -D SERIAL_TOOL=C:/esp/Espressif/python_env/idf5.0_py3.8_env/Scripts/python.exe;;C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/esptool_py/esptool/esptool.py;--chip;esp32 -D SERIAL_TOOL_ARGS=--before=default_reset;--after=hard_reset;write_flash;@flash_args -D WORKING_DIRECTORY=C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/build -P C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/esptool_py/run_serial_tool.cmake"
+esptool esp32 -p COM9 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 40m --flash_size 4MB 0x1000 bootloader/bootloader.bin 0x10000 esp32_cam_http_stream.bin 0x8000 partition_table/partition-table.bin
+esptool.py v4.5
+Serial port COM9
+Connecting.....
+Chip is ESP32-D0WDQ6 (revision v1.0)
+Features: WiFi, BT, Dual Core, 240MHz, VRef calibration in efuse, Coding Scheme None
+Crystal is 40MHz
+MAC: ec:62:60:9c:ed:94
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00001000 to 0x00007fff...
+Flash will be erased from 0x00010000 to 0x00111fff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+Compressed 26384 bytes to 16453...
+Writing at 0x00001000... (50 %)
+Writing at 0x000076ad... (100 %)
+Wrote 26384 bytes (16453 compressed) at 0x00001000 in 0.9 seconds (effective 239.3 kbit/s)...
+Hash of data verified.
+Compressed 1052800 bytes to 640865...
+Writing at 0x00010000... (2 %)
+Writing at 0x0001c912... (5 %)
+Writing at 0x00029cd5... (7 %)
+Writing at 0x0003051d... (10 %)
+Writing at 0x000364bd... (12 %)
+Writing at 0x00040f90... (15 %)
+Writing at 0x00046b0d... (17 %)
+Writing at 0x0004dc7f... (20 %)
+Writing at 0x0005573b... (22 %)
+Writing at 0x0005b9e5... (25 %)
+Writing at 0x000617e6... (27 %)
+Writing at 0x000674c8... (30 %)
+Writing at 0x0006d33b... (32 %)
+Writing at 0x00072e2c... (35 %)
+Writing at 0x00078c09... (37 %)
+Writing at 0x0007ebbc... (40 %)
+Writing at 0x000848f0... (42 %)
+Writing at 0x0008a246... (45 %)
+Writing at 0x00090a3b... (47 %)
+Writing at 0x00096869... (50 %)
+Writing at 0x0009c657... (52 %)
+Writing at 0x000a1cdc... (55 %)
+Writing at 0x000a6f47... (57 %)
+Writing at 0x000ac38d... (60 %)
+Traceback (most recent call last):
+  File "C:\esp\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\__init__.py", line 1031, in _main
+    main()
+  File "C:\esp\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\__init__.py", line 831, in main
+    operation_func(esp, args)
+  File "C:\esp\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\cmds.py", line 580, in write_flash
+    esp.flash_defl_block(block, seq, timeout=timeout)
+  File "C:\esp\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\loader.py", line 131, in inner
+    return func(*args, **kwargs)
+  File "C:\esp\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\loader.py", line 1030, in flash_defl_block
+    self.check_command(
+  File "C:\esp\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\loader.py", line 435, in check_command
+    val, data = self.command(op, data, chk, timeout=timeout)
+  File "C:\esp\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\loader.py", line 404, in command
+    p = self.read()
+  File "C:\esp\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\loader.py", line 337, in read
+    return next(self._slip_reader)
+StopIteration
+
+A fatal error occurred: The chip stopped responding.
+FAILED: CMakeFiles/flash C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/build/CMakeFiles/flash 
+cmd.exe /C "cd /D C:\esp\Espressif\frameworks\esp-idf-v5.0.1\components\esptool_py && C:\esp\Espressif\tools\cmake\3.24.0\bin\cmake.exe -D IDF_PATH=C:/esp/Espressif/frameworks/esp-idf-v5.0.1 -D SERIAL_TOOL=C:/esp/Espressif/python_env/idf5.0_py3.8_env/Scripts/python.exe;;C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/esptool_py/esptool/esptool.py;--chip;esp32 -D SERIAL_TOOL_ARGS=--before=default_reset;--after=hard_reset;write_flash;@flash_args -D WORKING_DIRECTORY=C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/build -P C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/esptool_py/run_serial_tool.cmake"
+ninja: build stopped: subcommand failed.

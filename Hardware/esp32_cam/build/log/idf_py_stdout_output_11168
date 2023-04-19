@@ -1,0 +1,154 @@
+[1/10] Performing build step for 'bootloader'
+[1/1] cmd.exe /C "cd /D C:\esp\Espressif\frameworks\HomeMonitoring\Hardware\esp32_cam\build\bootloader\esp-idf\esptool_py && C:\esp\Espressif\python_env\idf5.0_py3.8_env\Scripts\python.exe C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/build/bootloader/bootloader.bin"
+Bootloader binary size 0x6710 bytes. 0x8f0 bytes (8%) free.
+[2/8] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/main.c.obj
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c: In function 'camera_task':
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:103:24: warning: unused variable 'stream_httpd' [-Wunused-variable]
+  103 |         httpd_handle_t stream_httpd = setup_server();
+      |                        ^~~~~~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c: In function 'take_photo':
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:274:13: warning: unused variable 'fr_start' [-Wunused-variable]
+  274 |     int64_t fr_start = esp_timer_get_time();
+      |             ^~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:273:12: warning: unused variable 'part_buf' [-Wunused-variable]
+  273 |     char * part_buf[64];
+      |            ^~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:272:15: warning: unused variable '_jpg_buf' [-Wunused-variable]
+  272 |     uint8_t * _jpg_buf;
+      |               ^~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:271:12: warning: variable '_jpg_buf_len' set but not used [-Wunused-but-set-variable]
+  271 |     size_t _jpg_buf_len;
+      |            ^~~~~~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c: In function 'http_get_thingspeak_task':
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:314:14: warning: unused variable 'MQ4_' [-Wunused-variable]
+  314 |     uint32_t MQ4_ = 0;
+      |              ^~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:313:14: warning: unused variable 'hum_' [-Wunused-variable]
+  313 |     uint32_t hum_ = 0;
+      |              ^~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:312:14: warning: unused variable 'temp_' [-Wunused-variable]
+  312 |     uint32_t temp_ = 0;
+      |              ^~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:311:14: warning: unused variable 'data' [-Wunused-variable]
+  311 |     uint32_t data[3];
+      |              ^~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c: In function 'telegram_send_message':
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:532:15: warning: unused variable 'err' [-Wunused-variable]
+  532 |     esp_err_t err = esp_http_client_perform(client);
+      |               ^~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c: In function 'telegram_send_picture':
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:542:13: warning: unused variable 'fr_start' [-Wunused-variable]
+  542 |     int64_t fr_start = esp_timer_get_time();
+      |             ^~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:541:12: warning: unused variable 'part_buf' [-Wunused-variable]
+  541 |     char * part_buf[64];
+      |            ^~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:540:15: warning: unused variable '_jpg_buf' [-Wunused-variable]
+  540 |     uint8_t * _jpg_buf;
+      |               ^~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:539:12: warning: unused variable '_jpg_buf_len' [-Wunused-variable]
+  539 |     size_t _jpg_buf_len;
+      |            ^~~~~~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:538:15: warning: unused variable 'res' [-Wunused-variable]
+  538 |     esp_err_t res = ESP_OK;
+      |               ^~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:537:19: warning: variable 'fb' set but not used [-Wunused-but-set-variable]
+  537 |     camera_fb_t * fb = NULL;
+      |                   ^~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c: At top level:
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:49:13: warning: 'uart_event_task' declared 'static' but never defined [-Wunused-function]
+   49 | static void uart_event_task(void *pvParameters);
+      |             ^~~~~~~~~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:549:13: warning: 'telegram_message_stop' defined but not used [-Wunused-function]
+  549 | static void telegram_message_stop(esp_http_client_handle_t client)
+      |             ^~~~~~~~~~~~~~~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:535:13: warning: 'telegram_send_picture' defined but not used [-Wunused-function]
+  535 | static void telegram_send_picture(esp_http_client_handle_t client)
+      |             ^~~~~~~~~~~~~~~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:37:22: warning: 'queue_leak_gas' defined but not used [-Wunused-variable]
+   37 | static QueueHandle_t queue_leak_gas;
+      |                      ^~~~~~~~~~~~~~
+[3/8] Linking C static library esp-idf\main\libmain.a
+[4/8] Generating ld/sections.ld
+[5/8] Linking CXX executable esp32_cam_http_stream.elf
+[6/8] Generating binary image from built executable
+esptool.py v4.5
+Creating esp32 image...
+Merged 25 ELF sections
+Successfully created esp32 image.
+Generated C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/build/esp32_cam_http_stream.bin
+[7/8] cmd.exe /C "cd /D C:\esp\Espressif\frameworks\HomeMonitoring\Hardware\esp32_cam\build\esp-idf\esptool_py && C:\esp\Espressif\python_env\idf5.0_py3.8_env\Scripts\python.exe C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/partition_table/check_sizes.py --offset 0x8000 partition --type app C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/build/partition_table/partition-table.bin C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/build/esp32_cam_http_stream.bin"
+esp32_cam_http_stream.bin binary size 0x101040 bytes. Smallest app partition is 0x200000 bytes. 0xfefc0 bytes (50%) free.
+[7/8] cmd.exe /C "cd /D C:\esp\Espressif\frameworks\esp-idf-v5.0.1\components\esptool_py && C:\esp\Espressif\tools\cmake\3.24.0\bin\cmake.exe -D IDF_PATH=C:/esp/Espressif/frameworks/esp-idf-v5.0.1 -D SERIAL_TOOL=C:/esp/Espressif/python_env/idf5.0_py3.8_env/Scripts/python.exe;;C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/esptool_py/esptool/esptool.py;--chip;esp32 -D SERIAL_TOOL_ARGS=--before=default_reset;--after=hard_reset;write_flash;@flash_args -D WORKING_DIRECTORY=C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/build -P C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/esptool_py/run_serial_tool.cmake"
+esptool esp32 -p COM9 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 40m --flash_size 4MB 0x1000 bootloader/bootloader.bin 0x10000 esp32_cam_http_stream.bin 0x8000 partition_table/partition-table.bin
+esptool.py v4.5
+Serial port COM9
+Connecting....
+Chip is ESP32-D0WDQ6 (revision v1.0)
+Features: WiFi, BT, Dual Core, 240MHz, VRef calibration in efuse, Coding Scheme None
+Crystal is 40MHz
+MAC: ec:62:60:9c:ed:94
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00001000 to 0x00007fff...
+Flash will be erased from 0x00010000 to 0x00111fff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+Compressed 26384 bytes to 16453...
+Writing at 0x00001000... (50 %)
+Writing at 0x000076ad... (100 %)
+Wrote 26384 bytes (16453 compressed) at 0x00001000 in 0.9 seconds (effective 230.9 kbit/s)...
+Hash of data verified.
+Compressed 1052736 bytes to 640726...
+Writing at 0x00010000... (2 %)
+Writing at 0x0001c98e... (5 %)
+Writing at 0x00029d1b... (7 %)
+Writing at 0x00030525... (10 %)
+Writing at 0x000364d0... (12 %)
+Writing at 0x00040fcd... (15 %)
+Writing at 0x00046b9e... (17 %)
+Writing at 0x0004dcde... (20 %)
+Writing at 0x000557af... (22 %)
+Writing at 0x0005ba54... (25 %)
+Writing at 0x00061856... (27 %)
+Writing at 0x00067504... (30 %)
+Writing at 0x0006d38f... (32 %)
+Writing at 0x00072e87... (35 %)
+Writing at 0x00078c6a... (37 %)
+Writing at 0x0007ec23... (40 %)
+Writing at 0x00084988... (42 %)
+Writing at 0x0008a2b7... (45 %)
+Writing at 0x00090aec... (47 %)
+Writing at 0x000968d7... (50 %)
+Writing at 0x0009c6c0... (52 %)
+Writing at 0x000a1d3a... (55 %)
+Writing at 0x000a6fc6... (57 %)
+Writing at 0x000ac40b... (60 %)
+Writing at 0x000b17ca... (62 %)
+Writing at 0x000b6dce... (65 %)
+Writing at 0x000bc5c9... (67 %)
+Writing at 0x000c23f4... (70 %)
+Writing at 0x000c7e96... (72 %)
+Writing at 0x000cdc69... (75 %)
+Writing at 0x000d43e4... (77 %)
+Writing at 0x000d9c23... (80 %)
+Writing at 0x000e2f25... (82 %)
+Writing at 0x000ebcfa... (85 %)
+Writing at 0x000f3079... (87 %)
+Writing at 0x000f9c49... (90 %)
+Writing at 0x000ff8ec... (92 %)
+Writing at 0x001053be... (95 %)
+Writing at 0x0010b019... (97 %)
+Writing at 0x0011037f... (100 %)
+Wrote 1052736 bytes (640726 compressed) at 0x00010000 in 16.2 seconds (effective 518.5 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 120...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (120 compressed) at 0x00008000 in 0.1 seconds (effective 393.3 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...
