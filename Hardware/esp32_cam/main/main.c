@@ -18,7 +18,7 @@
 #define BUF_SIZE                (1024)
 #define HTTP_MAX_BUf            2048
 #define RD_BUF_SIZE             (BUF_SIZE)
-#define PART_BOUNDARY           "123456789000000000000987654321"
+#define PART_BOUNDARY           "HCMUT"
 #define CONFIG_XCLK_FREQ        20000000 
 #define TXD_PIN                 1
 #define RXD_PIN                 3
@@ -34,7 +34,7 @@ char recv_buf[512];
 
 static const char *TAG = "ESP32-CAM";
 static QueueHandle_t queue_data;
-static QueueHandle_t queue_leak_gas;
+// static QueueHandle_t queue_leak_gas;
 // static const char* _STREAM_CONTENT_TYPE = "multipart/x-mixed-replace;boundary=" PART_BOUNDARY;
 
 static const char* _STREAM_CONTENT_TYPE = "image/jpeg";
@@ -45,7 +45,7 @@ extern const char telegram_certificate_pem_end[]   asm("_binary_telegram_certifi
 
 /* Prototype */
 httpd_handle_t setup_server(void);
-esp_err_t jpg_stream_httpd_handler(httpd_req_t *req);
+// esp_err_t jpg_stream_httpd_handler(httpd_req_t *req);
 static void uart_event_task(void *pvParameters);
 static void Init_Hardware(void);
 static esp_err_t init_camera(void);
@@ -54,14 +54,14 @@ static uint32_t GetMQ4Value(uint8_t *buf);
 static void http_get_thingspeak_task(void *pvParameters);
 static void camera_task(void *pvParameters);
 // static void https_telegram_getMe_perform(void);
-esp_http_client_handle_t telegram_message_start(void);
+esp_http_client_handle_t telegram_send_message_start(void);
+
 esp_http_client_handle_t telegram_picture_start(void);
-
 static void telegram_task(void *pvParameters);
-static void telegram_message_stop(esp_http_client_handle_t client);
+static void telegram_stop(esp_http_client_handle_t client);
 static void telegram_send_message(esp_http_client_handle_t client, char *message);
-static void telegram_send_picture(esp_http_client_handle_t client);
-
+static void telegram_send_picture(esp_http_client_handle_t client, char *chat_id);
+esp_err_t camera_capture(void);
 esp_err_t _http_event_handler(esp_http_client_event_t *evt);
 esp_err_t take_photo(httpd_req_t *req);
 
@@ -77,7 +77,9 @@ void app_main()
 {
     Init_Hardware();
     connect_wifi(); 
-	xTaskCreate(&camera_task, "camera task", 1024*4, NULL, 3, NULL);
+    init_camera();
+
+	// xTaskCreate(&camera_task, "camera task", 1024*4, NULL, 3, NULL);
 	xTaskCreate(&read_uart, "UART task", 1024*3, NULL, 3, NULL);        
     xTaskCreate(&http_get_thingspeak_task, "http_get_task", 1024*4, NULL, 3, NULL);
     xTaskCreate(&telegram_task, "http_telegram_task", 8192*4, NULL, 3, NULL);
@@ -87,30 +89,27 @@ void app_main()
 static void telegram_task(void *pvParameters)
 {   
     strcat(url_string, TOKEN);
-    uint32_t data[3];
-    esp_http_client_handle_t client = telegram_message_start();
+    esp_http_client_handle_t client;
+    
+    client = telegram_picture_start();
+    telegram_send_picture(client, CHAT_ID);
+
+    // client = telegram_send_message_start();
+    // telegram_send_message(client, "Hello VietNam. \nHow are you?");
+
     while(1){
-        if (xQueueReceive(queue_data, data, portMAX_DELAY) == pdTRUE){
-            if(data[2] > 900){
-                telegram_send_message(client, "Gas Leak Detection!!!");
-            }
-        }
         vTaskDelay(10/portTICK_PERIOD_MS);
     }
-
-    // telegram_message_stop(client);
-    // vTaskDelete(NULL);
+    
 }
 
 static void camera_task(void *pvParameters)
 {
     if (wifi_connect_status){
-        ESP_ERROR_CHECK(init_camera());
-        printf("Init camera successfully!\n");
-        httpd_handle_t stream_httpd = setup_server();
-        ESP_LOGI(TAG, "Web Server is up and running\n");
+        setup_server();
+        ESP_LOGI(TAG, "Web Server is up and running");
     }else{
-        ESP_LOGI(TAG, "Failed to connecte with Wi-Fi, check your network credentials\n");
+        ESP_LOGE(TAG, "Failed to connect with Wi-Fi, check your network credentials");
     }  
     while(1){
         vTaskDelay(10/portTICK_PERIOD_MS);
@@ -198,12 +197,14 @@ static esp_err_t init_camera(void)
         .ledc_channel = LEDC_CHANNEL_0,
         .pixel_format = PIXFORMAT_JPEG,
         .frame_size = FRAMESIZE_VGA,
-        .jpeg_quality = 10,
+        .jpeg_quality = 3, //0-63 lower number means higher quality
         .fb_count = 1,
         .grab_mode = CAMERA_GRAB_WHEN_EMPTY
     };
+    //initialize the camera
     esp_err_t err = esp_camera_init(&camera_config);
     if (err != ESP_OK){
+        ESP_LOGE(TAG, "Camera Init Failed");
         return err;
     }
     return ESP_OK;
@@ -275,10 +276,7 @@ esp_err_t take_photo(httpd_req_t *req)
 {
     camera_fb_t * fb = NULL;
     esp_err_t res = ESP_OK;
-    size_t _jpg_buf_len;
-    uint8_t * _jpg_buf;
-    char * part_buf[64];
-    int64_t fr_start = esp_timer_get_time();
+
     fb = esp_camera_fb_get();
     if (!fb)
     {
@@ -286,6 +284,7 @@ esp_err_t take_photo(httpd_req_t *req)
       httpd_resp_send_500(req);
       return ESP_FAIL;
     }
+    ESP_LOGI(TAG, "Camera capture successfully");
     res = httpd_resp_set_type(req, "image/jpeg");
     if (res == ESP_OK)
     {
@@ -293,7 +292,6 @@ esp_err_t take_photo(httpd_req_t *req)
     }
     if (res == ESP_OK)
     {
-      _jpg_buf_len = fb->len;
       res = httpd_resp_send(req, (const char *)fb->buf, fb->len);
     }
     esp_camera_fb_return(fb);
@@ -393,9 +391,9 @@ static void http_get_thingspeak_task(void *pvParameters)
     }
 }
 
-esp_http_client_handle_t telegram_message_start(void) 
+esp_http_client_handle_t telegram_send_message_start(void) 
 {
-	char url[512] = "";
+	char url[512] = {0};
     char output_buffer[HTTP_MAX_BUf] = {0};   // Buffer to store response of http request
     esp_http_client_config_t config = {
         .url = "https://api.telegram.org",
@@ -405,29 +403,17 @@ esp_http_client_handle_t telegram_message_start(void)
 		.user_data = output_buffer,
     };
     esp_http_client_handle_t client = esp_http_client_init(&config);
-    strcat(url,url_string);
-    strcat(url,"/sendMessage");
-    esp_http_client_set_url(client, url);
+    strcat(url, url_string);
+    strcat(url, "/sendMessage");
+    esp_http_client_set_url(client, url); //url = https://api.telegram.org/bot{TOKEN}/sendMessage
+
+    printf("Ready to send message to telegram\n");
     return client;
 }
 
-esp_http_client_handle_t telegram_picture_start(void)
-{
-    char url[512] = "";
-    char output_buffer[HTTP_MAX_BUf] = {0};   // Buffer to store response of http request
-    esp_http_client_config_t config = {
-        .url = "https://api.telegram.org",
-        .transport_type = HTTP_TRANSPORT_OVER_SSL,
-        .event_handler = _http_event_handler,
-        .cert_pem = telegram_certificate_pem_start, 
-		.user_data = output_buffer,
-    };
-    esp_http_client_handle_t client = esp_http_client_init(&config);
-    strcat(url,url_string);
-    strcat(url,"/sendPhoto");
-    esp_http_client_set_url(client, url);
-    return client;
-}
+
+
+
 
 esp_err_t _http_event_handler(esp_http_client_event_t *evt) 
 {
@@ -508,26 +494,194 @@ static void telegram_send_message(esp_http_client_handle_t client, char *message
 	sprintf(post_data, "{\"chat_id\":%s,\"text\":\"%s\"}", CHAT_ID, message);
     esp_http_client_set_method(client, HTTP_METHOD_POST);
     esp_http_client_set_header(client, "Content-Type", "application/json");
+    // esp_http_client_set_header(client, "Content-Length", strlen(post_data));
     esp_http_client_set_post_field(client, post_data, strlen(post_data));
     esp_err_t err = esp_http_client_perform(client);
 }
 
-static void telegram_send_picture(esp_http_client_handle_t client)
+
+
+
+esp_http_client_handle_t telegram_picture_start(void)
 {
-    camera_fb_t * fb = NULL;
+    char url[512] = {0};
+    char output_buffer[HTTP_MAX_BUf] = {0};   // Buffer to store response of http request
+    esp_http_client_config_t config = {
+        .url = "https://api.telegram.org",
+        .transport_type = HTTP_TRANSPORT_OVER_SSL,
+        .event_handler = _http_event_handler,
+        .cert_pem = telegram_certificate_pem_start,
+		.user_data = output_buffer,
+    };
+    esp_http_client_handle_t client = esp_http_client_init(&config);
+    strcat(url, url_string);
+    strcat(url,"/sendPhoto");
+    esp_http_client_set_url(client, url);
+
+    printf("Ready to send picture to telegram\n");
+    return client;
+}
+static void telegram_send_picture(esp_http_client_handle_t client, char *chat_id)
+{
+    camera_fb_t *fb = NULL;
     esp_err_t res = ESP_OK;
-    size_t _jpg_buf_len;
-    uint8_t * _jpg_buf;
-    char * part_buf[64];
-    int64_t fr_start = esp_timer_get_time();
+    char part_buf[64];
+    //Take a picture
     fb = esp_camera_fb_get();
+    if (!fb) {
+        ESP_LOGE(TAG, "Camera capture failed");
+        return;
+    }
+    esp_http_client_set_method(client, HTTP_METHOD_POST);
+    esp_http_client_set_header(client, "Content-Type", "multipart/form-data; boundary=RandomNerdTutorials");
+    char *head = "--RandomNerdTutorials\r\nContent-Disposition: form-data; name=\"chat_id\"\r\n\r\n";
+    char *head_ = "\r\n--RandomNerdTutorials\r\nContent-Disposition: form-data; name=\"photo\"; filename=\"esp32-cam.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n";
+    char *tail = "\r\n--RandomNerdTutorials--\r\n";
+    size_t head_len = strlen(head);
+    size_t head__len = strlen(head_);
+    size_t tail_len = strlen(tail);
+    size_t total_len = head_len + tail_len + head__len + fb->len + strlen(chat_id);
+    char content_length[512];
+    snprintf(content_length, sizeof(content_length), "%d", total_len);
+    esp_http_client_set_header(client, "Content-Length", content_length);
+    esp_err_t err = esp_http_client_open(client, total_len);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to open HTTP connection: %s", esp_err_to_name(err));
+        esp_camera_fb_return(fb);
+        return;
+    }
+    esp_http_client_write(client, head, head_len);
+    esp_http_client_write(client, chat_id, strlen(chat_id));
+    esp_http_client_write(client, head_, head__len);
     
-    
+    uint8_t *fbBuf = fb->buf;
+    size_t fbLen = fb->len;
+    for (size_t n = 0; n < fbLen; n = n + 1024) {
+        if (n + 1024 < fbLen) {
+            esp_http_client_write(client, (const char *)fbBuf, 1024);
+            fbBuf += 1024;
+        } else if (fbLen % 1024 > 0) {
+            size_t remainder = fbLen % 1024;
+            esp_http_client_write(client, (const char *)fbBuf, remainder);
+        }
+    }
+    esp_http_client_write(client, tail, tail_len);
+
+
+
+
+
+
+    // char text1[1024] = "POST /bot5874407007:AAGksmiPfSyaePhCJC_ohMl1EL05_bfP9Pw/sendPhoto HTTP/1.1\r\n";
+    // char text2[1024] = "Host: api.telegram.org\r\n";
+    // char text3[1024] = "Content-Type: multipart/form-data; boundary=RandomNerdTutorials\r\n\r\n";
+
+    // char head[1024] = "--RandomNerdTutorials\r\nContent-Disposition: form-data; name=\"chat_id\"\r\n\r\n1928092894\r\n--RandomNerdTutorials\r\nContent-Disposition: form-data; name=\"photo\"; filename=\"esp32-cam.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n";
+    // char tail[1024] = "\r\n--RandomNerdTutorials--\r\n";
+    // uint32_t totalLen = fb->len + strlen(head) + strlen(tail);
+    // // esp_http_client_set_method(client, HTTP_METHOD_POST);
+    // // Set the Content-Type header
+    // char content_length[512];
+    // snprintf(content_length, sizeof(content_length), "%ld", totalLen);
+    // printf("%s\n", content_length);
+
+    // esp_http_client_set_post_field(client, text1, strlen(text1));
+    // esp_http_client_set_post_field(client, text2, strlen(text2));
+    // esp_http_client_set_header(client, "Content-Length", content_length);
+    // esp_http_client_set_post_field(client, text3, strlen(text3));
+
+    // // esp_http_client_set_header(client, "Content-Type", "multipart/form-data; boundary=--RandomNerdTutorials");
+    // esp_http_client_set_post_field(client, head, strlen(head));
+    // // Write the image data to the post data buffer
+    // esp_http_client_write(client, (const char *)fb->buf, (int)fb->len);
+    // // Write the closing boundary string
+    // esp_http_client_set_post_field(client, tail, strlen(tail));
+
+    // Perform the HTTP POST request
+    res = esp_http_client_perform(client);
+
+    // Free the camera frame buffer
+    esp_camera_fb_return(fb);
+
+    if (res != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to send HTTP request: %s", esp_err_to_name(res));
+        return;
+    }
 }
 
 
-static void telegram_message_stop(esp_http_client_handle_t client)
+// static void telegram_send_picture(esp_http_client_handle_t client, char *chat_id)
+// {
+//     camera_fb_t * fb = NULL;
+//     esp_err_t res = ESP_OK;
+//     char part_buf[64];
+//     fb = esp_camera_fb_get();
+//     if (!fb) {
+//         ESP_LOGE(TAG, "Camera capture failed");
+//         return;
+//     }
+
+//     //Set boundary
+//     snprintf(part_buf, sizeof(part_buf), PART_BOUNDARY);
+//     esp_http_client_set_method(client, HTTP_METHOD_POST);
+//     esp_http_client_set_header(client, "Content-Type", "multipart/form-data; boundary=123456789000000000000987654321");
+//     // esp_http_client_set_header(client, "Content-Length", itoa(fb->len, part_buf, 10));
+
+//     //Set the chat_id and content length
+//     int content_length = fb->len + strlen(chat_id) + strlen("--\r\n");
+//     esp_http_client_set_header(client, "Content-Length", itoa(content_length, part_buf, 10));
+//     char post_data[512] = "";
+//     snprintf(post_data, sizeof(post_data), "Content-Disposition: form-data; name=\"chat_id\"; \r\n\r\n%s\r\n", chat_id);
+//     esp_http_client_set_post_field(client, post_data, strlen(post_data));
+//     // Set the picture data
+//     // snprintf(post_data, sizeof(post_data), "Content-Disposition: form-data; name=\"photo\"; filename=\"photo.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n");
+//     sprintf(post_data, "---------------------------\r\nContent-Disposition: form-data; name=\"chat_id\"\r\n\r\n%s\r\n---------------------------\r\nContent-Disposition: form-data; name=\"photo\"; filename=\"photo.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n", chat_id);
+//     esp_http_client_write(client, post_data, strlen(post_data));
+//     esp_http_client_write(client, (const char *)fb->buf, (int)fb->len);
+//     esp_http_client_write(client, "\r\n--\r\n", strlen("\r\n--\r\n"));
+
+//     res = esp_http_client_perform(client);
+
+//     esp_camera_fb_return(fb);
+
+//     if (res != ESP_OK) {
+//         ESP_LOGE(TAG, "Failed to send HTTP request: %s", esp_err_to_name(res));
+//         return;
+//     }
+
+
+//     // //Send the picture
+//     // res = esp_http_client_set_post_field(client, (const char *)fb->buf, (int)fb->len);
+//     // if (res != ESP_OK) {
+//     //     ESP_LOGE(TAG, "Failed to set HTTP post field: %s", esp_err_to_name(res));
+//     //     return;
+//     // }
+//     // // snprintf((char *)part_buf, sizeof(part_buf), "multipart/form-data; boundary=%s", PART_BOUNDARY);
+
+//     // //Perform the HTTP request
+//     // res = esp_http_client_perform(client);
+//     // // printf("DEBUG--\n");
+//     // if (res != ESP_OK) {
+//     //     ESP_LOGE(TAG, "Failed to send HTTP request: %s", esp_err_to_name(res));
+//     //     return;
+//     // }
+//     // // printf("DEBUG--\n");
+//     // esp_camera_fb_return(fb); 
+// }
+
+
+static void telegram_stop(esp_http_client_handle_t client)
 {
     esp_http_client_close(client);
     esp_http_client_cleanup(client);
 } 
+esp_err_t camera_capture(void)
+{
+    camera_fb_t *fb = esp_camera_fb_get();
+    if(!fb){
+        ESP_LOGE(TAG, "Camera Captured Failed");
+        return ESP_FAIL;
+    }
+    esp_camera_fb_return(fb);
+    return ESP_OK;
+}

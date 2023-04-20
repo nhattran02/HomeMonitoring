@@ -5,8 +5,8 @@ static const char *TAG = "Connect_WiFi";
 int s_retry_num = 0;
 
 
-#define WIFI_SSID "MANGDAYKTX H2-808" //your name wifi
-#define WIFI_PASSWORD "44448888a"  //your wifi password
+#define WIFI_SSID "MANGDAYKTX H2-808" //your name wifi  MANGDAYKTX H2-808
+#define WIFI_PASSWORD "44448888a"  //your wifi password 44448888a
 #define MAXIMUM_RETRY 5
 /* FreeRTOS event group to signal when we are connected*/
 EventGroupHandle_t s_wifi_event_group;

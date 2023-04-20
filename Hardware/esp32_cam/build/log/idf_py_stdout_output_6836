@@ -1,0 +1,51 @@
+[1/10] Performing build step for 'bootloader'
+[1/1] cmd.exe /C "cd /D C:\esp\Espressif\frameworks\HomeMonitoring\Hardware\esp32_cam\build\bootloader\esp-idf\esptool_py && C:\esp\Espressif\python_env\idf5.0_py3.8_env\Scripts\python.exe C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/build/bootloader/bootloader.bin"
+Bootloader binary size 0x6710 bytes. 0x8f0 bytes (8%) free.
+[2/8] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/main.c.obj
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c: In function 'telegram_task':
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:89:14: warning: unused variable 'data' [-Wunused-variable]
+   89 |     uint32_t data[3];
+      |              ^~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c: In function 'camera_task':
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:113:24: warning: unused variable 'stream_httpd' [-Wunused-variable]
+  113 |         httpd_handle_t stream_httpd = setup_server();
+      |                        ^~~~~~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c: In function 'take_photo':
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:284:13: warning: unused variable 'fr_start' [-Wunused-variable]
+  284 |     int64_t fr_start = esp_timer_get_time();
+      |             ^~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:283:12: warning: unused variable 'part_buf' [-Wunused-variable]
+  283 |     char * part_buf[64];
+      |            ^~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:282:15: warning: unused variable '_jpg_buf' [-Wunused-variable]
+  282 |     uint8_t * _jpg_buf;
+      |               ^~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:281:12: warning: variable '_jpg_buf_len' set but not used [-Wunused-but-set-variable]
+  281 |     size_t _jpg_buf_len;
+      |            ^~~~~~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c: In function 'telegram_send_message':
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:515:15: warning: unused variable 'err' [-Wunused-variable]
+  515 |     esp_err_t err = esp_http_client_perform(client);
+      |               ^~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c: At top level:
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:49:13: warning: 'uart_event_task' declared 'static' but never defined [-Wunused-function]
+   49 | static void uart_event_task(void *pvParameters);
+      |             ^~~~~~~~~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:555:13: warning: 'telegram_stop' defined but not used [-Wunused-function]
+  555 | static void telegram_stop(esp_http_client_handle_t client)
+      |             ^~~~~~~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:42:20: warning: '_STREAM_PART' defined but not used [-Wunused-variable]
+   42 | static const char* _STREAM_PART = "Content-Type: image/jpeg\r\nContent-Length: %u\r\n\r\n";
+      |                    ^~~~~~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:41:20: warning: '_STREAM_BOUNDARY' defined but not used [-Wunused-variable]
+   41 | static const char* _STREAM_BOUNDARY = "\r\n--" PART_BOUNDARY "\r\n";
+      |                    ^~~~~~~~~~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:40:20: warning: '_STREAM_CONTENT_TYPE' defined but not used [-Wunused-variable]
+   40 | static const char* _STREAM_CONTENT_TYPE = "image/jpeg";
+      |                    ^~~~~~~~~~~~~~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:37:22: warning: 'queue_leak_gas' defined but not used [-Wunused-variable]
+   37 | static QueueHandle_t queue_leak_gas;
+      |                      ^~~~~~~~~~~~~~
+[3/8] Linking C static library esp-idf\main\libmain.a
+[4/8] Generating ld/sections.ld
+ninja: build stopped: interrupted by user.
