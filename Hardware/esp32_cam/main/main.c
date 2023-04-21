@@ -32,7 +32,7 @@ char recv_buf[512];
 
 static const char *TAG = "ESP32-CAM";
 static QueueHandle_t queue_data;
-
+static SemaphoreHandle_t sem_pir;
 
 static char* _PICTURE_CONTENT_TYPE = "multipart/form-data; boundary="PART_BOUNDARY;
 static char* _PICTURE_TAIL = "\r\n--"PART_BOUNDARY"--\r\n";
@@ -45,7 +45,6 @@ extern const char telegram_certificate_pem_start[] asm("_binary_telegram_certifi
 extern const char telegram_certificate_pem_end[]   asm("_binary_telegram_certificate_pem_end");
 
 /* Prototype */
-// httpd_handle_t setup_server(void);
 static void Init_Hardware(void);
 static void Init_PIR(void);
 static esp_err_t Init_camera(void);
@@ -60,40 +59,20 @@ static void telegram_task(void *pvParameters);
 static void telegram_stop(esp_http_client_handle_t client);
 esp_err_t _http_event_handler(esp_http_client_event_t *evt);
 
-void test(void *pvParameters)
-{
-    int pinNum;
-    printf("\nTest Task!\n");
-    while(1){
-        printf("\nHandle Detect!\n");
-        gpio_set_level(LED, 1);
-        vTaskDelay(500/portTICK_PERIOD_MS);
-        gpio_set_level(LED, 0);
-        vTaskDelay(1000/portTICK_PERIOD_MS);
-    }
-}
 static void IRAM_ATTR gpio_interrupt_handler(void *pvParameters)
 {
-    TickType_t now = xTaskGetTickCountFromISR();
-    if (now > next)
-    {
-        // xTaskCreate(test, "pic", configMINIMAL_STACK_SIZE * 5, NULL, 5, NULL);
-        xTaskCreate(&telegram_task, "http_telegram_task", 8192*4, NULL, 3, NULL);
-    }
-    next = now + period;
+    BaseType_t  xHigherPriorityTaskWoken  = pdFALSE;
+    xSemaphoreGiveFromISR(sem_pir, &xHigherPriorityTaskWoken);
 }
-
 void app_main()
 {
     Init_Hardware();
-    connect_wifi(); 
+    connect_wifi();
     Init_camera();
-    Init_PIR();
-
-	// xTaskCreate(&test, "UART task", 1024*3, NULL, 3, NULL);        
-	xTaskCreate(&read_uart, "UART task", 1024*3, NULL, 3, NULL);        
+    Init_PIR();   
+	xTaskCreate(&read_uart, "UART task", 1024*3, NULL, 3, NULL);
     xTaskCreate(&http_get_thingspeak_task, "http_get_task", 1024*4, NULL, 3, NULL);
-    // xTaskCreate(&telegram_task, "http_telegram_task", 8192*4, NULL, 3, NULL);
+    xTaskCreate(&telegram_task, "http_telegram_task", 8192*4, NULL, 3, NULL);
     while(1){
         vTaskDelay(10/portTICK_PERIOD_MS);
     }
@@ -103,18 +82,22 @@ static void telegram_task(void *pvParameters)
 {   
     strcat(url_string, TELEGRAM_TOKEN);
     esp_http_client_handle_t client;
-    // telegram_send_message(client, "Welcome to HomeMonitoring!\n\n/photo: takes a new photo\n\n/flash: turn on LED\n\n/read: reading your sensors\n\nYou'll receive a photo whenever motion is detected");
-    client = telegram_message_start();
-    telegram_send_message(client, "Motion Detected!!!");
-    telegram_stop(client);
+    while(1){
+        if(xSemaphoreTake(sem_pir, portMAX_DELAY) == pdTRUE){
+            gpio_intr_disable(PIR_MOTION_PIN);
+            client = telegram_message_start();
+            telegram_send_message(client, "Motion Detected!!!");
+            telegram_stop(client);
 
-    client = telegram_picture_start();
-    telegram_send_picture(client, TELEGRAM_CHAT_ID);
-    telegram_stop(client);
-
-    vTaskDelete(NULL);
+            client = telegram_picture_start();
+            telegram_send_picture(client, TELEGRAM_CHAT_ID);
+            telegram_stop(client);
+            gpio_intr_enable(PIR_MOTION_PIN);
+            // vTaskDelete(NULL);
+        }
+        vTaskDelay(10/portTICK_PERIOD_MS);
+    }   
 }
-
 
 static void read_uart(void *pvParameters)
 {
@@ -131,7 +114,6 @@ static void read_uart(void *pvParameters)
             if(xQueueSend(queue_data, (void*)data, 0) != pdTRUE){
                 printf("Failed to send data to queue!\n");
             }
-            // printf("- Temp: %d \n- Hum: %d \n- MQ4: %ld \n\n", temp, hum, MQ4);
         }
         vTaskDelay(10/portTICK_PERIOD_MS);
     }
@@ -162,11 +144,12 @@ static void Init_Hardware(void){
 
     //Create queue
     queue_data = xQueueCreate(10, sizeof(uint32_t)*3);
+    //Create semaphore
+    sem_pir = xSemaphoreCreateBinary();
 }
 
 static void Init_PIR(void)
 {
-    // gpio_uninstall_isr_service();
     //Enable PIR_MOTION interrupt
     gpio_config_t io_conf = {
         .mode = GPIO_MODE_INPUT,
@@ -207,7 +190,7 @@ static esp_err_t Init_camera(void)
         .frame_size = FRAMESIZE_VGA,
         .jpeg_quality = 3, //0-63 lower number means higher quality
         .fb_count = 1,
-        .grab_mode = CAMERA_GRAB_WHEN_EMPTY
+        .grab_mode = CAMERA_GRAB_LATEST
     };
     //initialize the camera
     esp_err_t err = esp_camera_init(&camera_config);
@@ -218,8 +201,6 @@ static esp_err_t Init_camera(void)
     ESP_LOGI(TAG, "Init successfully");
     return ESP_OK;
 }
-
-
 
 static uint32_t GetMQ4Value(uint8_t *buf)
 {
@@ -426,10 +407,12 @@ esp_http_client_handle_t telegram_picture_start(void)
 }
 static void telegram_send_picture(esp_http_client_handle_t client, char *chat_id)
 {
-    gpio_set_level(LED, 1);
     camera_fb_t *fb = NULL;
     esp_err_t ret = ESP_OK;
     //Take a picture
+    gpio_set_level(LED, 1);
+    esp_camera_fb_return(fb);
+    printf("\nTake ...\n");
     fb = esp_camera_fb_get();
     if (!fb) {
         ESP_LOGE(TAG, "Camera capture failed");
@@ -449,7 +432,7 @@ static void telegram_send_picture(esp_http_client_handle_t client, char *chat_id
     char content_length[6];
     snprintf(content_length, sizeof(content_length), "%d", total_len);
     esp_http_client_set_header(client, "Content-Length", content_length);
-    gpio_set_level(LED, 0);
+    // gpio_set_level(LED, 0);
 
     ret = esp_http_client_open(client, total_len);
     if (ret != ESP_OK) {
@@ -457,6 +440,8 @@ static void telegram_send_picture(esp_http_client_handle_t client, char *chat_id
         esp_camera_fb_return(fb);
         return;
     }
+    gpio_set_level(LED, 0);
+
     esp_http_client_write(client, head1, head1_len);
     esp_http_client_write(client, chat_id, strlen(chat_id));
     esp_http_client_write(client, head2, head2_len);
@@ -464,9 +449,10 @@ static void telegram_send_picture(esp_http_client_handle_t client, char *chat_id
     esp_http_client_write(client, (const char *)fb->buf, fb->len);
     esp_http_client_write(client, tail, tail_len);
     // Perform the HTTP POST 
-    esp_http_client_perform(client);
+    ESP_ERROR_CHECK(esp_http_client_perform(client));
     // Free the camera frame buffer
     esp_camera_fb_return(fb);
+    printf("\nFree Image Buffer\n");
 }
 
 

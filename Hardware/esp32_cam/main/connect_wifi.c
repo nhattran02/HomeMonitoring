@@ -5,8 +5,8 @@ static const char *TAG = "Connect_WiFi";
 int s_retry_num = 0;
 
 
-#define WIFI_SSID "MANGDAYKTX H2-808" //your name wifi  MANGDAYKTX H2-808
-#define WIFI_PASSWORD "44448888a"  //your wifi password 44448888a
+#define WIFI_SSID "wifi" //your name wifi  MANGDAYKTX H2-808
+#define WIFI_PASSWORD "12345678"  //your wifi password 44448888a
 #define MAXIMUM_RETRY 5
 /* FreeRTOS event group to signal when we are connected*/
 EventGroupHandle_t s_wifi_event_group;
@@ -108,6 +108,14 @@ void connect_wifi(void)
     {
         ESP_LOGI(TAG, "connected to ap SSID:%s password:%s",
                  WIFI_SSID, WIFI_PASSWORD);
+        for(int i = 0; i < 2; i++){
+            gpio_set_level(4, 1);
+            vTaskDelay(200/portTICK_PERIOD_MS);
+            gpio_set_level(4, 0);
+            vTaskDelay(200/portTICK_PERIOD_MS);
+        }
+
+
     }
     else if (bits & WIFI_FAIL_BIT)
     {
