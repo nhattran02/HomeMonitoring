@@ -1,0 +1,37 @@
+Traceback (most recent call last):
+  File "runpy.py", line 194, in _run_module_as_main
+  File "runpy.py", line 87, in _run_code
+  File "C:\esp\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\__main__.py", line 9, in <module>
+    esptool._main()
+  File "C:\esp\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\__init__.py", line 1031, in _main
+    main()
+  File "C:\esp\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\__init__.py", line 831, in main
+    operation_func(esp, args)
+  File "C:\esp\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\cmds.py", line 580, in write_flash
+    esp.flash_defl_block(block, seq, timeout=timeout)
+  File "C:\esp\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\loader.py", line 131, in inner
+    return func(*args, **kwargs)
+  File "C:\esp\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\loader.py", line 1030, in flash_defl_block
+    self.check_command(
+  File "C:\esp\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\loader.py", line 435, in check_command
+    val, data = self.command(op, data, chk, timeout=timeout)
+  File "C:\esp\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\loader.py", line 404, in command
+    p = self.read()
+  File "C:\esp\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\loader.py", line 337, in read
+    return next(self._slip_reader)
+  File "C:\esp\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\loader.py", line 1505, in slip_reader
+    waiting = port.inWaiting()
+  File "C:\esp\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\serial\serialutil.py", line 594, in inWaiting
+    return self.in_waiting
+  File "C:\esp\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\serial\serialwin32.py", line 258, in in_waiting
+    if not win32.ClearCommError(self._port_handle, ctypes.byref(flags), ctypes.byref(comstat)):
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/esptool_py/esptool/esptool.py", line 11, in <module>
+    sys.exit(subprocess.run([sys.executable, '-m', 'esptool'] + sys.argv[1:]).returncode)
+  File "subprocess.py", line 491, in run
+  File "subprocess.py", line 1016, in communicate
+  File "subprocess.py", line 1079, in wait
+  File "subprocess.py", line 1357, in _wait
+KeyboardInterrupt
+^C

@@ -1,0 +1,91 @@
+[1/10] Performing build step for 'bootloader'
+[1/1] cmd.exe /C "cd /D C:\esp\Espressif\frameworks\HomeMonitoring\Hardware\esp32_cam\build\bootloader\esp-idf\esptool_py && C:\esp\Espressif\python_env\idf5.0_py3.8_env\Scripts\python.exe C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/build/bootloader/bootloader.bin"
+Bootloader binary size 0x6710 bytes. 0x8f0 bytes (8%) free.
+[2/8] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/main.c.obj
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:225:13: warning: 'http_get_thingspeak_task' defined but not used [-Wunused-function]
+  225 | static void http_get_thingspeak_task(void *pvParameters)
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:114:13: warning: 'read_uart' defined but not used [-Wunused-function]
+  114 | static void read_uart(void *pvParameters)
+      |             ^~~~~~~~~
+C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/main/main.c:97:13: warning: 'telegram_task' defined but not used [-Wunused-function]
+   97 | static void telegram_task(void *pvParameters)
+      |             ^~~~~~~~~~~~~
+[3/8] Linking C static library esp-idf\main\libmain.a
+[4/8] Generating ld/sections.ld
+[5/8] Linking CXX executable esp32_cam_http_stream.elf
+[6/8] Generating binary image from built executable
+esptool.py v4.5
+Creating esp32 image...
+Merged 25 ELF sections
+Successfully created esp32 image.
+Generated C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/build/esp32_cam_http_stream.bin
+[7/8] cmd.exe /C "cd /D C:\esp\Espressif\frameworks\HomeMonitoring\Hardware\esp32_cam\build\esp-idf\esptool_py && C:\esp\Espressif\python_env\idf5.0_py3.8_env\Scripts\python.exe C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/partition_table/check_sizes.py --offset 0x8000 partition --type app C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/build/partition_table/partition-table.bin C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/build/esp32_cam_http_stream.bin"
+esp32_cam_http_stream.bin binary size 0xd9be0 bytes. Smallest app partition is 0x200000 bytes. 0x126420 bytes (57%) free.
+[7/8] cmd.exe /C "cd /D C:\esp\Espressif\frameworks\esp-idf-v5.0.1\components\esptool_py && C:\esp\Espressif\tools\cmake\3.24.0\bin\cmake.exe -D IDF_PATH=C:/esp/Espressif/frameworks/esp-idf-v5.0.1 -D SERIAL_TOOL=C:/esp/Espressif/python_env/idf5.0_py3.8_env/Scripts/python.exe;;C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/esptool_py/esptool/esptool.py;--chip;esp32 -D SERIAL_TOOL_ARGS=--before=default_reset;--after=hard_reset;write_flash;@flash_args -D WORKING_DIRECTORY=C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/build -P C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/esptool_py/run_serial_tool.cmake"
+esptool esp32 -p COM9 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 40m --flash_size 4MB 0x1000 bootloader/bootloader.bin 0x10000 esp32_cam_http_stream.bin 0x8000 partition_table/partition-table.bin
+esptool.py v4.5
+Serial port COM9
+Connecting......
+Chip is ESP32-D0WDQ6 (revision v1.0)
+Features: WiFi, BT, Dual Core, 240MHz, VRef calibration in efuse, Coding Scheme None
+Crystal is 40MHz
+MAC: ec:62:60:9c:ed:94
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00001000 to 0x00007fff...
+Flash will be erased from 0x00010000 to 0x000e9fff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+Compressed 26384 bytes to 16452...
+Writing at 0x00001000... (50 %)
+Writing at 0x000076ad... (100 %)
+Wrote 26384 bytes (16452 compressed) at 0x00001000 in 0.9 seconds (effective 234.7 kbit/s)...
+Hash of data verified.
+Compressed 891872 bytes to 542810...
+Writing at 0x00010000... (2 %)
+Writing at 0x0001dd38... (5 %)
+Writing at 0x000262e8... (8 %)
+Writing at 0x0002baac... (11 %)
+Writing at 0x00036694... (14 %)
+Writing at 0x0003f36d... (17 %)
+Writing at 0x00044e14... (20 %)
+Writing at 0x0004c0c7... (23 %)
+Writing at 0x00053b96... (26 %)
+Writing at 0x00059e07... (29 %)
+Writing at 0x0005fb84... (32 %)
+Writing at 0x00065b79... (35 %)
+Writing at 0x0006c1c0... (38 %)
+Writing at 0x00071eeb... (41 %)
+Writing at 0x00077095... (44 %)
+Writing at 0x0007c579... (47 %)
+Writing at 0x0008173e... (50 %)
+Writing at 0x00086f49... (52 %)
+Writing at 0x0008c673... (55 %)
+Writing at 0x00091f87... (58 %)
+Writing at 0x00097ca7... (61 %)
+Writing at 0x0009d760... (64 %)
+Writing at 0x000a323b... (67 %)
+Writing at 0x000a9123... (70 %)
+Writing at 0x000aeb71... (73 %)
+Writing at 0x000b4a63... (76 %)
+Writing at 0x000ba4de... (79 %)
+Writing at 0x000c3791... (82 %)
+Writing at 0x000cc07f... (85 %)
+Writing at 0x000d227b... (88 %)
+Writing at 0x000d82a9... (91 %)
+Writing at 0x000ddd24... (94 %)
+Writing at 0x000e39f3... (97 %)
+Writing at 0x000e8d53... (100 %)
+Wrote 891872 bytes (542810 compressed) at 0x00010000 in 13.3 seconds (effective 536.4 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 120...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (120 compressed) at 0x00008000 in 0.1 seconds (effective 335.2 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...
