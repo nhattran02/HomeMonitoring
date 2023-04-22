@@ -40,6 +40,7 @@ static char* _PICTURE_HEADER_1 = "--"PART_BOUNDARY"\r\nContent-Disposition: form
 static char* _PICTURE_HEADER_2 = "\r\n--"PART_BOUNDARY"\r\nContent-Disposition: form-data; name=\"photo\"; filename=\"esp32-cam.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n";
 static TickType_t next = 0;
 const TickType_t period = 20000 / portTICK_PERIOD_MS;
+bool new_frame_available = false;
 
 extern const char telegram_certificate_pem_start[] asm("_binary_telegram_certificate_pem_start");
 extern const char telegram_certificate_pem_end[]   asm("_binary_telegram_certificate_pem_end");
@@ -59,10 +60,11 @@ static void telegram_task(void *pvParameters);
 static void telegram_stop(esp_http_client_handle_t client);
 esp_err_t _http_event_handler(esp_http_client_event_t *evt);
 
+
 static void IRAM_ATTR gpio_interrupt_handler(void *pvParameters)
 {
-    BaseType_t  xHigherPriorityTaskWoken  = pdFALSE;
-    xSemaphoreGiveFromISR(sem_pir, &xHigherPriorityTaskWoken);
+    new_frame_available = true;
+    // xSemaphoreGiveFromISR(sem_pir, &xHigherPriorityTaskWoken);
 }
 void app_main()
 {
@@ -83,18 +85,25 @@ static void telegram_task(void *pvParameters)
     strcat(url_string, TELEGRAM_TOKEN);
     esp_http_client_handle_t client;
     while(1){
-        if(xSemaphoreTake(sem_pir, portMAX_DELAY) == pdTRUE){
-            gpio_intr_disable(PIR_MOTION_PIN);
+        // if(xSemaphoreTake(sem_pir, portMAX_DELAY) == pdTRUE){   
+        if(new_frame_available){
+
+            // gpio_intr_disable(PIR_MOTION_PIN);
             client = telegram_message_start();
             telegram_send_message(client, "Motion Detected!!!");
             telegram_stop(client);
 
-            client = telegram_picture_start();
-            telegram_send_picture(client, TELEGRAM_CHAT_ID);
-            telegram_stop(client);
-            gpio_intr_enable(PIR_MOTION_PIN);
-            // vTaskDelete(NULL);
+            if(new_frame_available){
+                client = telegram_picture_start();
+                telegram_send_picture(client, TELEGRAM_CHAT_ID);
+                telegram_stop(client);
+                new_frame_available = false;
+                // gpio_intr_enable(PIR_MOTION_PIN);
+                // vTaskDelete(NULL);
+            }
         }
+        // }
+
         vTaskDelay(10/portTICK_PERIOD_MS);
     }   
 }
@@ -187,8 +196,8 @@ static esp_err_t Init_camera(void)
         .ledc_timer = LEDC_TIMER_0,
         .ledc_channel = LEDC_CHANNEL_0,
         .pixel_format = PIXFORMAT_JPEG, //PIXFORMAT_RGB565 PIXFORMAT_RGB555 PIXFORMAT_YUV422 PIXFORMAT_GRAYSCALE
-        .frame_size = FRAMESIZE_VGA,
-        .jpeg_quality = 3, //0-63 lower number means higher quality
+        .frame_size = FRAMESIZE_QSXGA,  //FRAMESIZE_VGA
+        .jpeg_quality = 12, //0-63 lower number means higher quality
         .fb_count = 1,
         .grab_mode = CAMERA_GRAB_LATEST
     };
