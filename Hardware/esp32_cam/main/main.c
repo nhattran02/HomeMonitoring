@@ -21,10 +21,11 @@
 #define CONFIG_XCLK_FREQ        20000000 
 #define TXD_PIN                 1
 #define RXD_PIN                 3
+#define GAS_THRESHOLD           900
 #define WEB_SERVER              "api.thingspeak.com"
 #define WEB_PORT                "80"
-#define TELEGRAM_TOKEN                   "5874407007:AAGksmiPfSyaePhCJC_ohMl1EL05_bfP9Pw"
-#define TELEGRAM_CHAT_ID                 "1928092894"
+#define TELEGRAM_TOKEN          "5874407007:AAGksmiPfSyaePhCJC_ohMl1EL05_bfP9Pw"
+#define TELEGRAM_CHAT_ID        "1928092894"
 #define PIR_MOTION_PIN          2
 char url_string[512] = "https://api.telegram.org/bot";
 char REQUEST[512];
@@ -32,12 +33,11 @@ char recv_buf[512];
 
 static const char *TAG = "ESP32-CAM";
 static QueueHandle_t queue_data;
-static QueueHandle_t queue_pic;
 static char* _PICTURE_CONTENT_TYPE = "multipart/form-data; boundary="PART_BOUNDARY;
 static char* _PICTURE_TAIL = "\r\n--"PART_BOUNDARY"--\r\n";
 static char* _PICTURE_HEADER_1 = "--"PART_BOUNDARY"\r\nContent-Disposition: form-data; name=\"chat_id\"\r\n\r\n";
 static char* _PICTURE_HEADER_2 = "\r\n--"PART_BOUNDARY"\r\nContent-Disposition: form-data; name=\"photo\"; filename=\"esp32-cam.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n";
-bool new_frame_available = false;
+bool flag = false;
 
 extern const char telegram_certificate_pem_start[] asm("_binary_telegram_certificate_pem_start");
 extern const char telegram_certificate_pem_end[]   asm("_binary_telegram_certificate_pem_end");
@@ -53,15 +53,17 @@ esp_http_client_handle_t telegram_message_start(void);
 static void telegram_send_message(esp_http_client_handle_t client, char *message);
 esp_http_client_handle_t telegram_picture_start(void);
 static void telegram_send_picture(esp_http_client_handle_t client, char *chat_id);
-static void telegram_task(void *pvParameters);
+static void telegram_pic_task(void *pvParameters);
 static void telegram_stop(esp_http_client_handle_t client);
 esp_err_t _http_event_handler(esp_http_client_event_t *evt);
+static void telegram_gas_task(void *pvParameters);
 
 
 static void IRAM_ATTR gpio_interrupt_handler(void *pvParameters)
 {
-    new_frame_available = true;
+    flag = true;
 }
+
 void app_main()
 {
     Init_Hardware();
@@ -69,29 +71,28 @@ void app_main()
     Init_camera();
     Init_PIR();   
 	xTaskCreate(&read_uart, "UART task", 1024*3, NULL, 3, NULL);
-    xTaskCreate(&http_get_thingspeak_task, "http_get_task", 1024*4, NULL, 3, NULL);
-    xTaskCreate(&telegram_task, "http_telegram_task", 8192*4, NULL, 3, NULL);
+    xTaskCreate(&http_get_thingspeak_task, "thingspeak task", 1024*4, NULL, 3, NULL);
+    xTaskCreate(&telegram_pic_task, "telegram camera task", 8192*4, NULL, 3, NULL);
+    xTaskCreate(&telegram_gas_task, "telegram gas task", 8192*2, NULL, 3, NULL);
+
     while(1){
         vTaskDelay(10/portTICK_PERIOD_MS);
     }
 }
 
-static void telegram_task(void *pvParameters)
+static void telegram_pic_task(void *pvParameters)
 {   
     strcat(url_string, TELEGRAM_TOKEN);
     esp_http_client_handle_t client1, client2;
     while(1){
-        if(new_frame_available){
-            // Init_camera();
+        if(flag){
             client2 = telegram_picture_start();
             telegram_send_picture(client2, TELEGRAM_CHAT_ID);
             telegram_stop(client2);
             client1 = telegram_message_start();
             telegram_send_message(client1, "Motion Detected!!!");
             telegram_stop(client1);
-
-
-            new_frame_available = false;            
+            flag = false;            
         }
         vTaskDelay(10/portTICK_PERIOD_MS);
     }   
@@ -410,9 +411,8 @@ static void telegram_send_picture(esp_http_client_handle_t client, char *chat_id
 {
     camera_fb_t *fb = NULL;
     esp_err_t ret = ESP_OK;
+
     //Take a picture
-    // esp_camera_fb_return(fb);
-    printf("\nTake ...\n");
     gpio_set_level(LED, 1);
     fb = esp_camera_fb_get();
     if (!fb) {
@@ -433,7 +433,6 @@ static void telegram_send_picture(esp_http_client_handle_t client, char *chat_id
     char content_length[6];
     snprintf(content_length, sizeof(content_length), "%d", total_len);
     esp_http_client_set_header(client, "Content-Length", content_length);
-    // gpio_set_level(LED, 0);
 
     ret = esp_http_client_open(client, total_len);
     if (ret != ESP_OK) {
@@ -448,14 +447,13 @@ static void telegram_send_picture(esp_http_client_handle_t client, char *chat_id
     esp_http_client_write(client, head2, head2_len);
 
     esp_http_client_write(client, (const char *)fb->buf, fb->len);
-    // esp_camera_fb_return(fb);
-    // printf("\nFree Image Buffer1\n");
     esp_http_client_write(client, tail, tail_len);
+
     // Perform the HTTP POST 
     ESP_ERROR_CHECK(esp_http_client_perform(client));
+
     // Free the camera frame buffer
     esp_camera_fb_return(fb);
-    printf("\nFree Image Buffer2\n");
 }
 
 
@@ -465,4 +463,19 @@ static void telegram_stop(esp_http_client_handle_t client)
     esp_http_client_cleanup(client);
 } 
 
+static void telegram_gas_task(void *pvParameters)
+{
+    uint32_t data[3];
+    esp_http_client_handle_t client;
+    while(1){
+        if (xQueueReceive(queue_data, data, portMAX_DELAY) == pdTRUE){
+            if(data[2] > GAS_THRESHOLD){
+                client = telegram_message_start();
+                telegram_send_message(client, "Gas Leak Detected!!!");
+                telegram_stop(client);
+            }
+        }   
+        vTaskDelay(10/portTICK_PERIOD_MS);
+    }
+}
 

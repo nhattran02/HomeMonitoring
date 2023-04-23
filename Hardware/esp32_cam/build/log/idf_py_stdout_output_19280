@@ -1,0 +1,5 @@
+[1/4] cd /home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/build/esp-idf/esptool_py && /home/minhnhat/.espressif/python_env/idf5.1_py3.8_env/bin/python /home/minhnhat/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/build/partition_table/partition-table.bin /home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/build/esp32_cam_http_stream.bin
+esp32_cam_http_stream.bin binary size 0x102a30 bytes. Smallest app partition is 0x200000 bytes. 0xfd5d0 bytes (49%) free.
+[2/4] Performing build step for 'bootloader'
+[1/1] cd /home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/build/bootloader/esp-idf/esptool_py && /home/minhnhat/.espressif/python_env/idf5.1_py3.8_env/bin/python /home/minhnhat/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 /home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/build/bootloader/bootloader.bin
+Bootloader binary size 0x6730 bytes. 0x8d0 bytes (8%) free.

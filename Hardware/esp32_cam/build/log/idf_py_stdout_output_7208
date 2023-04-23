@@ -1,9 +1,0 @@
-[1/7] Performing build step for 'bootloader'
-[1/1] cmd.exe /C "cd /D C:\esp\Espressif\frameworks\HomeMonitoring\Hardware\esp32_cam\build\bootloader\esp-idf\esptool_py && C:\esp\Espressif\python_env\idf5.0_py3.8_env\Scripts\python.exe C:/esp/Espressif/frameworks/esp-idf-v5.0.1/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 C:/esp/Espressif/frameworks/HomeMonitoring/Hardware/esp32_cam/build/bootloader/bootloader.bin"
-Bootloader binary size 0x6710 bytes. 0x8f0 bytes (8%) free.
-[2/5] Linking CXX executable esp32_cam_http_stream.elf
-FAILED: esp32_cam_http_stream.elf 
-cmd.exe /C "cd . && C:\esp\Espressif\tools\xtensa-esp32-elf\esp-2022r1-11.2.0\xtensa-esp32-elf\bin\xtensa-esp32-elf-g++.exe -mlongcalls -Wno-frame-address  @CMakeFiles\esp32_cam_http_stream.elf.rsp -o esp32_cam_http_stream.elf  && cd ."
-c:/esp/espressif/tools/xtensa-esp32-elf/esp-2022r1-11.2.0/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/11.2.0/../../../../xtensa-esp32-elf/bin/ld.exe: esp-idf/main/libmain.a(main.c.obj):(.literal.Init_Hardware+0x20): undefined reference to `pir_handler'
-collect2.exe: error: ld returned 1 exit status
-ninja: build stopped: subcommand failed.
