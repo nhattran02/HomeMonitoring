@@ -1,0 +1,107 @@
+[0/1] Re-running CMake...
+-- Building ESP-IDF components for target esp32
+-- Project sdkconfig file /home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/sdkconfig
+-- App "esp32_cam_http_stream" version: 3af82b7-dirty
+-- Adding linker script /home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/build/esp-idf/esp_system/ld/memory.ld
+-- Adding linker script /home/minhnhat/esp/esp-idf/components/esp_system/ld/esp32/sections.ld.in
+-- Adding linker script /home/minhnhat/esp/esp-idf/components/esp_rom/esp32/ld/esp32.rom.ld
+-- Adding linker script /home/minhnhat/esp/esp-idf/components/esp_rom/esp32/ld/esp32.rom.api.ld
+-- Adding linker script /home/minhnhat/esp/esp-idf/components/esp_rom/esp32/ld/esp32.rom.libgcc.ld
+-- Adding linker script /home/minhnhat/esp/esp-idf/components/esp_rom/esp32/ld/esp32.rom.newlib-data.ld
+-- Adding linker script /home/minhnhat/esp/esp-idf/components/esp_rom/esp32/ld/esp32.rom.syscalls.ld
+-- Adding linker script /home/minhnhat/esp/esp-idf/components/soc/esp32/ld/esp32.peripherals.ld
+-- Components: app_trace app_update bootloader bootloader_support bt cmock console cxx driver efuse esp-tls esp32-camera esp_adc esp_app_format esp_common esp_eth esp_event esp_gdbstub esp_hid esp_http_client esp_http_server esp_https_ota esp_https_server esp_hw_support esp_lcd esp_local_ctrl esp_mm esp_netif esp_netif_stack esp_partition esp_phy esp_pm esp_psram esp_ringbuf esp_rom esp_system esp_timer esp_wifi espcoredump esptool_py fatfs freertos hal heap http_parser idf_test ieee802154 json log lwip main mbedtls mqtt newlib nvs_flash openthread partition_table perfmon protobuf-c protocomm pthread sdmmc soc spi_flash spiffs tcp_transport ulp unity usb vfs wear_levelling wifi_provisioning wpa_supplicant xtensa
+-- Component paths: /home/minhnhat/esp/esp-idf/components/app_trace /home/minhnhat/esp/esp-idf/components/app_update /home/minhnhat/esp/esp-idf/components/bootloader /home/minhnhat/esp/esp-idf/components/bootloader_support /home/minhnhat/esp/esp-idf/components/bt /home/minhnhat/esp/esp-idf/components/cmock /home/minhnhat/esp/esp-idf/components/console /home/minhnhat/esp/esp-idf/components/cxx /home/minhnhat/esp/esp-idf/components/driver /home/minhnhat/esp/esp-idf/components/efuse /home/minhnhat/esp/esp-idf/components/esp-tls /home/minhnhat/esp/esp-idf/components/esp32-camera /home/minhnhat/esp/esp-idf/components/esp_adc /home/minhnhat/esp/esp-idf/components/esp_app_format /home/minhnhat/esp/esp-idf/components/esp_common /home/minhnhat/esp/esp-idf/components/esp_eth /home/minhnhat/esp/esp-idf/components/esp_event /home/minhnhat/esp/esp-idf/components/esp_gdbstub /home/minhnhat/esp/esp-idf/components/esp_hid /home/minhnhat/esp/esp-idf/components/esp_http_client /home/minhnhat/esp/esp-idf/components/esp_http_server /home/minhnhat/esp/esp-idf/components/esp_https_ota /home/minhnhat/esp/esp-idf/components/esp_https_server /home/minhnhat/esp/esp-idf/components/esp_hw_support /home/minhnhat/esp/esp-idf/components/esp_lcd /home/minhnhat/esp/esp-idf/components/esp_local_ctrl /home/minhnhat/esp/esp-idf/components/esp_mm /home/minhnhat/esp/esp-idf/components/esp_netif /home/minhnhat/esp/esp-idf/components/esp_netif_stack /home/minhnhat/esp/esp-idf/components/esp_partition /home/minhnhat/esp/esp-idf/components/esp_phy /home/minhnhat/esp/esp-idf/components/esp_pm /home/minhnhat/esp/esp-idf/components/esp_psram /home/minhnhat/esp/esp-idf/components/esp_ringbuf /home/minhnhat/esp/esp-idf/components/esp_rom /home/minhnhat/esp/esp-idf/components/esp_system /home/minhnhat/esp/esp-idf/components/esp_timer /home/minhnhat/esp/esp-idf/components/esp_wifi /home/minhnhat/esp/esp-idf/components/espcoredump /home/minhnhat/esp/esp-idf/components/esptool_py /home/minhnhat/esp/esp-idf/components/fatfs /home/minhnhat/esp/esp-idf/components/freertos /home/minhnhat/esp/esp-idf/components/hal /home/minhnhat/esp/esp-idf/components/heap /home/minhnhat/esp/esp-idf/components/http_parser /home/minhnhat/esp/esp-idf/components/idf_test /home/minhnhat/esp/esp-idf/components/ieee802154 /home/minhnhat/esp/esp-idf/components/json /home/minhnhat/esp/esp-idf/components/log /home/minhnhat/esp/esp-idf/components/lwip /home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/main /home/minhnhat/esp/esp-idf/components/mbedtls /home/minhnhat/esp/esp-idf/components/mqtt /home/minhnhat/esp/esp-idf/components/newlib /home/minhnhat/esp/esp-idf/components/nvs_flash /home/minhnhat/esp/esp-idf/components/openthread /home/minhnhat/esp/esp-idf/components/partition_table /home/minhnhat/esp/esp-idf/components/perfmon /home/minhnhat/esp/esp-idf/components/protobuf-c /home/minhnhat/esp/esp-idf/components/protocomm /home/minhnhat/esp/esp-idf/components/pthread /home/minhnhat/esp/esp-idf/components/sdmmc /home/minhnhat/esp/esp-idf/components/soc /home/minhnhat/esp/esp-idf/components/spi_flash /home/minhnhat/esp/esp-idf/components/spiffs /home/minhnhat/esp/esp-idf/components/tcp_transport /home/minhnhat/esp/esp-idf/components/ulp /home/minhnhat/esp/esp-idf/components/unity /home/minhnhat/esp/esp-idf/components/usb /home/minhnhat/esp/esp-idf/components/vfs /home/minhnhat/esp/esp-idf/components/wear_levelling /home/minhnhat/esp/esp-idf/components/wifi_provisioning /home/minhnhat/esp/esp-idf/components/wpa_supplicant /home/minhnhat/esp/esp-idf/components/xtensa
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/build
+[1/12] Building C object esp-idf/esp_app_format/CMakeFiles/__idf_esp_app_format.dir/esp_app_desc.c.obj
+[2/12] Linking C static library esp-idf/esp_app_format/libesp_app_format.a
+[3/12] Performing build step for 'bootloader'
+[1/1] cd /home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/build/bootloader/esp-idf/esptool_py && /home/minhnhat/.espressif/python_env/idf5.1_py3.8_env/bin/python /home/minhnhat/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 /home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/build/bootloader/bootloader.bin
+Bootloader binary size 0x6730 bytes. 0x8d0 bytes (8%) free.
+[4/10] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/main.c.obj
+[5/10] Linking C static library esp-idf/main/libmain.a
+[6/10] Generating ld/sections.ld
+[7/10] Linking CXX executable esp32_cam_http_stream.elf
+[8/10] Generating binary image from built executable
+esptool.py v4.5.dev2
+Creating esp32 image...
+Merged 25 ELF sections
+Successfully created esp32 image.
+Generated /home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/build/esp32_cam_http_stream.bin
+[9/10] cd /home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/build/esp-idf/esptool_py && /home/minhnhat/.espressif/python_env/idf5.1_py3.8_env/bin/python /home/minhnhat/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/build/partition_table/partition-table.bin /home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/build/esp32_cam_http_stream.bin
+esp32_cam_http_stream.bin binary size 0x102a50 bytes. Smallest app partition is 0x200000 bytes. 0xfd5b0 bytes (49%) free.
+[9/10] cd /home/minhnhat/esp/esp-idf/components/esptool_py && /usr/bin/cmake -D IDF_PATH=/home/minhnhat/esp/esp-idf -D "SERIAL_TOOL=/home/minhnhat/.espressif/python_env/idf5.1_py3.8_env/bin/python;;/home/minhnhat/esp/esp-idf/components/esptool_py/esptool/esptool.py;--chip;esp32" -D "SERIAL_TOOL_ARGS=--before=default_reset;--after=hard_reset;write_flash;@flash_args" -D WORKING_DIRECTORY=/home/minhnhat/esp/workspace/HomeMonitoring/Hardware/esp32_cam/build -P /home/minhnhat/esp/esp-idf/components/esptool_py/run_serial_tool.cmake
+esptool esp32 -p /dev/ttyUSB0 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 40m --flash_size 4MB 0x1000 bootloader/bootloader.bin 0x10000 esp32_cam_http_stream.bin 0x8000 partition_table/partition-table.bin
+esptool.py v4.5.dev2
+Serial port /dev/ttyUSB0
+Connecting......
+Chip is ESP32-D0WDQ6 (revision v1.0)
+Features: WiFi, BT, Dual Core, 240MHz, VRef calibration in efuse, Coding Scheme None
+Crystal is 40MHz
+MAC: ec:62:60:9c:ed:94
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00001000 to 0x00007fff...
+Flash will be erased from 0x00010000 to 0x00112fff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+Compressed 26416 bytes to 16499...
+Writing at 0x00001000... (50 %)
+Writing at 0x0000769d... (100 %)
+Wrote 26416 bytes (16499 compressed) at 0x00001000 in 0.9 seconds (effective 233.5 kbit/s)...
+Hash of data verified.
+Compressed 1059408 bytes to 642931...
+Writing at 0x00010000... (2 %)
+Writing at 0x0001cac6... (5 %)
+Writing at 0x00029fa2... (7 %)
+Writing at 0x0002fe53... (10 %)
+Writing at 0x00036419... (12 %)
+Writing at 0x00042c71... (15 %)
+Writing at 0x0004990e... (17 %)
+Writing at 0x0004f64f... (20 %)
+Writing at 0x0005548d... (22 %)
+Writing at 0x0005c856... (25 %)
+Writing at 0x00063732... (27 %)
+Writing at 0x0006a3ee... (30 %)
+Writing at 0x000702e0... (32 %)
+Writing at 0x00075e45... (35 %)
+Writing at 0x0007b847... (37 %)
+Writing at 0x00081663... (40 %)
+Writing at 0x00087493... (42 %)
+Writing at 0x0008d3b1... (45 %)
+Writing at 0x00092e87... (47 %)
+Writing at 0x0009889d... (50 %)
+Writing at 0x0009f10c... (52 %)
+Writing at 0x000a4fd1... (55 %)
+Writing at 0x000aad3a... (57 %)
+Writing at 0x000b0363... (60 %)
+Writing at 0x000b565d... (62 %)
+Writing at 0x000baba9... (65 %)
+Writing at 0x000bfff2... (67 %)
+Writing at 0x000c5720... (70 %)
+Writing at 0x000cb0b2... (72 %)
+Writing at 0x000d0cd6... (75 %)
+Writing at 0x000d663c... (77 %)
+Writing at 0x000dc2ff... (80 %)
+Writing at 0x000e2a7b... (82 %)
+Writing at 0x000e86b2... (85 %)
+Writing at 0x000eee8d... (87 %)
+Writing at 0x000f9f21... (90 %)
+Writing at 0x0010046c... (92 %)
+Writing at 0x001061cc... (95 %)
+Writing at 0x0010becc... (97 %)
+Writing at 0x001111fc... (100 %)
+Wrote 1059408 bytes (642931 compressed) at 0x00010000 in 16.3 seconds (effective 519.2 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 120...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (120 compressed) at 0x00008000 in 0.1 seconds (effective 322.1 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...

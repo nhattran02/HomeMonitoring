@@ -189,9 +189,9 @@ static esp_err_t Init_camera(void)
         .ledc_timer = LEDC_TIMER_0,
         .ledc_channel = LEDC_CHANNEL_0,
         .pixel_format = PIXFORMAT_JPEG, //PIXFORMAT_RGB565 PIXFORMAT_RGB555 PIXFORMAT_YUV422 PIXFORMAT_GRAYSCALE
-        .frame_size = FRAMESIZE_QSXGA,  //FRAMESIZE_VGA
-        .jpeg_quality = 12, //0-63 lower number means higher quality
-        .fb_count = 1,
+        .frame_size = FRAMESIZE_VGA,  //FRAMESIZE_VGA    FRAMESIZE_QSXGA
+        .jpeg_quality = 10, //0-63 lower number means higher quality  12
+        .fb_count = 2,
         .grab_mode = CAMERA_GRAB_LATEST
     };
     //initialize the camera

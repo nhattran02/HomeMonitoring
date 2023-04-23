@@ -1064,3 +1064,17 @@
 7392	7570	1682238957559202021	.bin_timestamp	fa68cf4d5a7ab393
 7570	7606	0	esp-idf/esptool_py/CMakeFiles/app_check_size	c3ded97ba1229a66
 7606	28041	0	CMakeFiles/flash	7d2079acd46ade47
+1	4705	1682242924618676050	build.ninja	a253cb4f07acf8c6
+21	70	1682242924806672859	esp-idf/esp_app_format/CMakeFiles/__idf_esp_app_format.dir/esp_app_desc.c.obj	164e9900232dd0a5
+70	85	1682242924822672588	esp-idf/esp_app_format/libesp_app_format.a	28c59f1db2a14cf7
+20	91	1682231610102254959	bootloader-prefix/src/bootloader-stamp/bootloader-build	c617097aea689ca5
+20	91	1682231610102254959	bootloader/bootloader.elf	c617097aea689ca5
+20	91	1682231610102254959	bootloader/bootloader.bin	c617097aea689ca5
+20	91	1682231610102254959	bootloader/bootloader.map	c617097aea689ca5
+86	344	1682242925078668242	esp-idf/main/CMakeFiles/__idf_main.dir/main.c.obj	17acfb7fd73a7939
+344	361	1682242925098667903	esp-idf/main/libmain.a	d9e7159113d60f28
+361	3286	1682242927986618884	esp-idf/esp_system/ld/sections.ld	f8a5398b06852d9c
+3286	7973	1682242932698538899	esp32_cam_http_stream.elf	ac07f496b99a13ca
+7973	8167	1682242932902535436	.bin_timestamp	fa68cf4d5a7ab393
+8167	8210	0	esp-idf/esptool_py/CMakeFiles/app_check_size	c3ded97ba1229a66
+8210	28673	0	CMakeFiles/flash	7d2079acd46ade47
