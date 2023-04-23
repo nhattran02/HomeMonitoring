@@ -32,14 +32,11 @@ char recv_buf[512];
 
 static const char *TAG = "ESP32-CAM";
 static QueueHandle_t queue_data;
-static SemaphoreHandle_t sem_pir;
-
+static QueueHandle_t queue_pic;
 static char* _PICTURE_CONTENT_TYPE = "multipart/form-data; boundary="PART_BOUNDARY;
 static char* _PICTURE_TAIL = "\r\n--"PART_BOUNDARY"--\r\n";
 static char* _PICTURE_HEADER_1 = "--"PART_BOUNDARY"\r\nContent-Disposition: form-data; name=\"chat_id\"\r\n\r\n";
 static char* _PICTURE_HEADER_2 = "\r\n--"PART_BOUNDARY"\r\nContent-Disposition: form-data; name=\"photo\"; filename=\"esp32-cam.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n";
-static TickType_t next = 0;
-const TickType_t period = 20000 / portTICK_PERIOD_MS;
 bool new_frame_available = false;
 
 extern const char telegram_certificate_pem_start[] asm("_binary_telegram_certificate_pem_start");
@@ -64,7 +61,9 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt);
 static void IRAM_ATTR gpio_interrupt_handler(void *pvParameters)
 {
     new_frame_available = true;
+    // test();
     // xSemaphoreGiveFromISR(sem_pir, &xHigherPriorityTaskWoken);
+    // xTaskCreate(&test, "test", 8192*4, NULL, 3, NULL);
 }
 void app_main()
 {
@@ -83,30 +82,26 @@ void app_main()
 static void telegram_task(void *pvParameters)
 {   
     strcat(url_string, TELEGRAM_TOKEN);
-    esp_http_client_handle_t client;
+    esp_http_client_handle_t client1, client2;
     while(1){
-        // if(xSemaphoreTake(sem_pir, portMAX_DELAY) == pdTRUE){   
+        // if(xSemaphoreTake(sem_pir, portMAX_DELAY) == pdTRUE){
         if(new_frame_available){
+            client1 = telegram_message_start();
+            telegram_send_message(client1, "Motion Detected!!!");
+            telegram_stop(client1);
 
-            // gpio_intr_disable(PIR_MOTION_PIN);
-            client = telegram_message_start();
-            telegram_send_message(client, "Motion Detected!!!");
-            telegram_stop(client);
-
-            if(new_frame_available){
-                client = telegram_picture_start();
-                telegram_send_picture(client, TELEGRAM_CHAT_ID);
-                telegram_stop(client);
-                new_frame_available = false;
-                // gpio_intr_enable(PIR_MOTION_PIN);
-                // vTaskDelete(NULL);
-            }
+            client2 = telegram_picture_start();
+            telegram_send_picture(client2, TELEGRAM_CHAT_ID);
+            telegram_stop(client2);
+            new_frame_available = false;            
         }
-        // }
 
         vTaskDelay(10/portTICK_PERIOD_MS);
     }   
 }
+
+
+
 
 static void read_uart(void *pvParameters)
 {
@@ -153,8 +148,7 @@ static void Init_Hardware(void){
 
     //Create queue
     queue_data = xQueueCreate(10, sizeof(uint32_t)*3);
-    //Create semaphore
-    sem_pir = xSemaphoreCreateBinary();
+
 }
 
 static void Init_PIR(void)
