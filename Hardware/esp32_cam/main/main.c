@@ -61,9 +61,6 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt);
 static void IRAM_ATTR gpio_interrupt_handler(void *pvParameters)
 {
     new_frame_available = true;
-    // test();
-    // xSemaphoreGiveFromISR(sem_pir, &xHigherPriorityTaskWoken);
-    // xTaskCreate(&test, "test", 8192*4, NULL, 3, NULL);
 }
 void app_main()
 {
@@ -84,18 +81,18 @@ static void telegram_task(void *pvParameters)
     strcat(url_string, TELEGRAM_TOKEN);
     esp_http_client_handle_t client1, client2;
     while(1){
-        // if(xSemaphoreTake(sem_pir, portMAX_DELAY) == pdTRUE){
         if(new_frame_available){
+            // Init_camera();
+            client2 = telegram_picture_start();
+            telegram_send_picture(client2, TELEGRAM_CHAT_ID);
+            telegram_stop(client2);
             client1 = telegram_message_start();
             telegram_send_message(client1, "Motion Detected!!!");
             telegram_stop(client1);
 
-            client2 = telegram_picture_start();
-            telegram_send_picture(client2, TELEGRAM_CHAT_ID);
-            telegram_stop(client2);
+
             new_frame_available = false;            
         }
-
         vTaskDelay(10/portTICK_PERIOD_MS);
     }   
 }
@@ -163,6 +160,7 @@ static void Init_PIR(void)
     };
     gpio_config(&io_conf);
     // gpio_install_isr_service(0);
+    //  gpio_install_isr_service()
     gpio_isr_handler_add(PIR_MOTION_PIN, gpio_interrupt_handler, NULL);
     printf("\nInit PIR successfully\n");
 }
@@ -413,9 +411,9 @@ static void telegram_send_picture(esp_http_client_handle_t client, char *chat_id
     camera_fb_t *fb = NULL;
     esp_err_t ret = ESP_OK;
     //Take a picture
-    gpio_set_level(LED, 1);
-    esp_camera_fb_return(fb);
+    // esp_camera_fb_return(fb);
     printf("\nTake ...\n");
+    gpio_set_level(LED, 1);
     fb = esp_camera_fb_get();
     if (!fb) {
         ESP_LOGE(TAG, "Camera capture failed");
@@ -450,12 +448,14 @@ static void telegram_send_picture(esp_http_client_handle_t client, char *chat_id
     esp_http_client_write(client, head2, head2_len);
 
     esp_http_client_write(client, (const char *)fb->buf, fb->len);
+    // esp_camera_fb_return(fb);
+    // printf("\nFree Image Buffer1\n");
     esp_http_client_write(client, tail, tail_len);
     // Perform the HTTP POST 
     ESP_ERROR_CHECK(esp_http_client_perform(client));
     // Free the camera frame buffer
     esp_camera_fb_return(fb);
-    printf("\nFree Image Buffer\n");
+    printf("\nFree Image Buffer2\n");
 }
 
 
