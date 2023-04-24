@@ -17,6 +17,7 @@ typedef struct{
 	uint8_t temperature;
 	uint8_t humidity;
 }DHT11_Type_t;
+
 void set_pin_output(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin);
 void set_pin_input(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin);
 void DHT11_Start(void);
