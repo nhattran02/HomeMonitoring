@@ -24,8 +24,8 @@
 #define GAS_THRESHOLD           900
 #define WEB_SERVER              "api.thingspeak.com"
 #define WEB_PORT                "80"
-#define TELEGRAM_TOKEN          "5874407007:AAGksmiPfSyaePhCJC_ohMl1EL05_bfP9Pw"
-#define TELEGRAM_CHAT_ID        "1928092894"
+#define TELEGRAM_TOKEN          ""
+#define TELEGRAM_CHAT_ID        ""
 #define PIR_MOTION_PIN          2
 char url_string[512] = "https://api.telegram.org/bot";
 char REQUEST[512];
